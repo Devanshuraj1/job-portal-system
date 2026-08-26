@@ -1,0 +1,191 @@
+.edit-page {
+    min-height: calc(100vh - 70px);
+    background: #f5f7fb;
+    padding: 40px 20px;
+  }
+  
+  .edit-container {
+    max-width: 760px;
+    margin: 0 auto;
+  
+    background: #ffffff;
+  
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+  
+    padding: 35px;
+  
+    box-sizing: border-box;
+  
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  }
+  
+  .edit-header {
+    margin-bottom: 30px;
+  }
+  
+  .edit-header h1 {
+    margin: 0 0 8px;
+  
+    font-size: 28px;
+    color: #111827;
+  }
+  
+  .edit-header p {
+    margin: 0;
+  
+    color: #6b7280;
+    font-size: 15px;
+  }
+  
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  
+  .edit-form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .edit-form-group label {
+    margin-bottom: 8px;
+  
+    color: #374151;
+  
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .edit-form-group input,
+  .edit-form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+  
+    padding: 12px 14px;
+  
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+  
+    font-family: inherit;
+    font-size: 15px;
+  
+    color: #111827;
+  
+    outline: none;
+  
+    transition: 0.2s;
+  }
+  
+  .edit-form-group input {
+    height: 46px;
+  }
+  
+  .edit-form-group textarea {
+    resize: vertical;
+    min-height: 130px;
+  }
+  
+  .edit-form-group input:focus,
+  .edit-form-group textarea:focus {
+    border-color: #2563eb;
+  
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  
+  .edit-form-group small {
+    margin-top: 7px;
+  
+    color: #6b7280;
+    font-size: 12px;
+  }
+  
+  .edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  
+    margin-top: 8px;
+    padding-top: 22px;
+  
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .edit-cancel-btn,
+  .edit-save-btn {
+    padding: 11px 20px;
+  
+    border-radius: 8px;
+  
+    font-size: 14px;
+    font-weight: 600;
+  
+    cursor: pointer;
+  }
+  
+  .edit-cancel-btn {
+    background: white;
+    color: #374151;
+  
+    border: 1px solid #d1d5db;
+  }
+  
+  .edit-cancel-btn:hover {
+    background: #f9fafb;
+  }
+  
+  .edit-save-btn {
+    background: #2563eb;
+    color: white;
+  
+    border: 1px solid #2563eb;
+  }
+  
+  .edit-save-btn:hover {
+    background: #1d4ed8;
+  }
+  
+  .edit-loading {
+    min-height: 70vh;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    flex-direction: column;
+    gap: 15px;
+  
+    background: #f5f7fb;
+  }
+  
+  .edit-loading button {
+    padding: 10px 18px;
+  
+    border: none;
+    border-radius: 7px;
+  
+    background: #2563eb;
+    color: white;
+  
+    cursor: pointer;
+  }
+  
+  @media (max-width: 600px) {
+    .edit-page {
+      padding: 20px 15px;
+    }
+  
+    .edit-container {
+      padding: 25px 20px;
+    }
+  
+    .edit-actions {
+      flex-direction: column-reverse;
+    }
+  
+    .edit-cancel-btn,
+    .edit-save-btn {
+      width: 100%;
+    }
+  }

@@ -1,0 +1,287 @@
+.register-page {
+    min-height: calc(100vh - 70px);
+  
+    padding: 50px 20px;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    box-sizing: border-box;
+  
+    background: #f6f7fb;
+  }
+  
+  .register-card {
+    width: 100%;
+    max-width: 950px;
+  
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  
+    background: white;
+  
+    border: 1px solid #e5e7eb;
+  
+    border-radius: 18px;
+  
+    overflow: hidden;
+  
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  }
+  
+  /* LEFT */
+  
+  .register-brand {
+    padding: 55px 48px;
+  
+    background: #111827;
+  
+    color: white;
+  }
+  
+  .register-logo {
+    width: 48px;
+    height: 48px;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    background: #4f46e5;
+  
+    border-radius: 12px;
+  
+    font-size: 23px;
+    font-weight: 700;
+  
+    margin-bottom: 40px;
+  }
+  
+  .register-brand h1 {
+    margin: 0 0 18px;
+  
+    font-size: 38px;
+    line-height: 1.15;
+  }
+  
+  .register-brand > p {
+    color: #cbd5e1;
+  
+    font-size: 15px;
+  
+    line-height: 1.7;
+  
+    max-width: 350px;
+  
+    margin-bottom: 35px;
+  }
+  
+  .register-points > div {
+    display: flex;
+    align-items: center;
+  
+    gap: 12px;
+  
+    margin-bottom: 18px;
+  }
+  
+  .register-points span {
+    width: 24px;
+    height: 24px;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    border-radius: 50%;
+  
+    background: #4f46e5;
+  
+    font-size: 13px;
+  }
+  
+  .register-points p {
+    margin: 0;
+  
+    color: #e5e7eb;
+  
+    font-size: 14px;
+  }
+  
+  /* RIGHT */
+  
+  .register-form-section {
+    padding: 55px 50px;
+  }
+  
+  .register-form-section h2 {
+    margin: 0;
+  
+    font-size: 30px;
+  
+    color: #111827;
+  }
+  
+  .register-description {
+    margin: 10px 0 32px;
+  
+    color: #667085;
+  
+    font-size: 14px;
+  }
+  
+  /* INPUT */
+  
+  .register-field {
+    margin-bottom: 20px;
+  }
+  
+  .register-field label {
+    display: block;
+  
+    margin-bottom: 7px;
+  
+    color: #344054;
+  
+    font-size: 14px;
+  
+    font-weight: 600;
+  }
+  
+  .register-field input {
+    width: 100%;
+  
+    height: 48px;
+  
+    box-sizing: border-box;
+  
+    padding: 0 14px;
+  
+    border: 1px solid #d0d5dd;
+  
+    border-radius: 8px;
+  
+    outline: none;
+  
+    font-size: 15px;
+  
+    transition: 0.2s;
+  }
+  
+  .register-field input:focus {
+    border-color: #4f46e5;
+  
+    box-shadow:
+      0 0 0 3px rgba(79, 70, 229, 0.12);
+  }
+  
+  .register-field input::placeholder {
+    color: #98a2b3;
+  }
+  
+  /* BUTTON */
+  
+  .register-button {
+    width: 100%;
+  
+    height: 48px;
+  
+    margin-top: 8px;
+  
+    border: none;
+  
+    border-radius: 8px;
+  
+    background: #4f46e5;
+  
+    color: white;
+  
+    font-size: 15px;
+  
+    font-weight: 600;
+  
+    cursor: pointer;
+  
+    transition: 0.2s;
+  }
+  
+  .register-button:hover {
+    background: #4338ca;
+  
+    transform: translateY(-1px);
+  }
+  
+  .register-button:disabled {
+    opacity: 0.7;
+  
+    cursor: not-allowed;
+  }
+  
+  /* LOGIN LINK */
+  
+  .register-login {
+    display: flex;
+  
+    justify-content: center;
+  
+    align-items: center;
+  
+    gap: 5px;
+  
+    margin-top: 25px;
+  
+    color: #667085;
+  
+    font-size: 14px;
+  }
+  
+  .register-login a {
+    color: #4f46e5;
+  
+    font-weight: 600;
+  
+    text-decoration: none;
+  }
+  
+  .register-login a:hover {
+    text-decoration: underline;
+  }
+  
+  /* RESPONSIVE */
+  
+  @media (max-width: 750px) {
+  
+    .register-card {
+      grid-template-columns: 1fr;
+    }
+  
+    .register-brand {
+      padding: 35px;
+    }
+  
+    .register-brand h1 {
+      font-size: 30px;
+    }
+  
+    .register-points {
+      display: none;
+    }
+  
+    .register-form-section {
+      padding: 35px;
+    }
+  }
+  
+  @media (max-width: 450px) {
+  
+    .register-page {
+      padding: 25px 15px;
+    }
+  
+    .register-brand,
+    .register-form-section {
+      padding: 28px 22px;
+    }
+  
+  }
