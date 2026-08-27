@@ -23,55 +23,154 @@ public class UserService {
     @Autowired
     private JwtService jwtService;
 
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private BCryptPasswordEncoder encoder =
+            new BCryptPasswordEncoder(12);
 
-    // Register User
+
+    // =========================
+    // REGISTER USER
+    // =========================
+
     public User register(User user) {
 
-        // Never allow public registration as ADMIN
+        // Admin registration not allowed
         if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-            throw new RuntimeException("Admin registration is not allowed");
+
+            throw new RuntimeException(
+                    "Admin registration is not allowed"
+            );
         }
 
-        // Normal Job Seeker
+
+        // =========================
+        // NORMAL USER
+        // =========================
+
         if ("USER".equalsIgnoreCase(user.getRole())) {
 
             user.setRole("USER");
-            user.setRecruiterStatus("NOT_APPLICABLE");
+
+            user.setRecruiterStatus(
+                    "NOT_APPLICABLE"
+            );
         }
 
-        // Recruiter
+
+        // =========================
+        // RECRUITER
+        // =========================
+
         else if ("RECRUITER".equalsIgnoreCase(user.getRole())) {
 
             user.setRole("RECRUITER");
-            user.setRecruiterStatus("PENDING");
+
+            user.setRecruiterStatus(
+                    "PENDING"
+            );
         }
 
-        // Invalid role
+
+        // =========================
+        // INVALID ROLE
+        // =========================
+
         else {
-            throw new RuntimeException("Invalid role");
+
+            throw new RuntimeException(
+                    "Invalid role"
+            );
         }
 
-        // Encrypt password
-        user.setPassword(encoder.encode(user.getPassword()));
+
+        // =========================
+        // ENCRYPT PASSWORD
+        // =========================
+
+        user.setPassword(
+                encoder.encode(user.getPassword())
+        );
+
 
         return repo.save(user);
     }
 
-    // Login User
+
+    // =========================
+    // LOGIN
+    // =========================
+
     public String verify(User user) {
 
-        Authentication authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getUsername(),
-                        user.getPassword()
-                )
-        );
+        // Find user first
+        User existingUser =
+                repo.findByUsername(
+                        user.getUsername()
+                );
+
+
+        // User doesn't exist
+        if (existingUser == null) {
+
+            throw new RuntimeException(
+                    "Invalid username or password"
+            );
+        }
+
+
+        // =========================
+        // RECRUITER STATUS CHECK
+        // =========================
+
+        if ("RECRUITER".equalsIgnoreCase(
+                existingUser.getRole())) {
+
+
+            // PENDING
+            if ("PENDING".equalsIgnoreCase(
+                    existingUser.getRecruiterStatus())) {
+
+                throw new RuntimeException(
+                        "Recruiter account is pending admin approval"
+                );
+            }
+
+
+            // REJECTED
+            if ("REJECTED".equalsIgnoreCase(
+                    existingUser.getRecruiterStatus())) {
+
+                throw new RuntimeException(
+                        "Recruiter account has been rejected"
+                );
+            }
+
+        }
+
+
+        // =========================
+        // AUTHENTICATE
+        // =========================
+
+        Authentication authentication =
+                authManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                user.getUsername(),
+                                user.getPassword()
+                        )
+                );
+
 
         UserDetails userDetails =
-                (UserDetails) authentication.getPrincipal();
+                (UserDetails)
+                        authentication.getPrincipal();
 
-        return jwtService.generateToken(userDetails);
+
+        // =========================
+        // GENERATE JWT
+        // =========================
+
+        return jwtService.generateToken(
+                userDetails
+        );
     }
-
 }

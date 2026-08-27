@@ -1,5 +1,10 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import {
+  BrowserRouter,
+  Routes,
+  Route
+} from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import AllPosts from "./components/AllPosts";
@@ -8,38 +13,131 @@ import Edit from "./components/Edit";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./components/AdminDashboard";
+import JobDetails from "./components/JobDetails";
+
 
 function App() {
+
   return (
+
     <BrowserRouter>
 
       <Navbar />
 
       <Routes>
 
-        <Route path="/" element={<AllPosts />} />
 
-        <Route path="/login" element={<Login />} />
+        {/* =========================
+            HOME
+        ========================= */}
 
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/"
+          element={<AllPosts />}
+        />
+
+
+        {/* =========================
+            LOGIN
+        ========================= */}
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+
+        {/* =========================
+            REGISTER
+        ========================= */}
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+
+        {/* =========================
+            JOB DETAILS
+        ========================= */}
+
+        <Route
+          path="/job/:id"
+          element={<JobDetails />}
+        />
+
+
+        {/* =========================
+            CREATE JOB
+            RECRUITER + ADMIN
+        ========================= */}
 
         <Route
           path="/create"
           element={
-            <ProtectedRoute>
+
+            <ProtectedRoute
+              allowedRoles={[
+                "RECRUITER",
+                "ADMIN"
+              ]}
+            >
+
               <Create />
+
             </ProtectedRoute>
+
           }
         />
+
+
+        {/* =========================
+            EDIT JOB
+            RECRUITER + ADMIN
+        ========================= */}
 
         <Route
           path="/edit"
           element={
-            <ProtectedRoute>
+
+            <ProtectedRoute
+              allowedRoles={[
+                "RECRUITER",
+                "ADMIN"
+              ]}
+            >
+
               <Edit />
+
             </ProtectedRoute>
+
           }
         />
+
+
+        {/* =========================
+            ADMIN DASHBOARD
+            ADMIN ONLY
+        ========================= */}
+
+        <Route
+          path="/admin"
+          element={
+
+            <ProtectedRoute
+              allowedRoles={[
+                "ADMIN"
+              ]}
+            >
+
+              <AdminDashboard />
+
+            </ProtectedRoute>
+
+          }
+        />
+
 
       </Routes>
 

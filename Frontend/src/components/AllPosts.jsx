@@ -61,6 +61,14 @@ const AllPosts = () => {
   }, [query]);
 
   // =========================
+  // VIEW JOB DETAILS
+  // =========================
+
+  const handleViewDetails = (id) => {
+    navigate(`/job/${id}`);
+  };
+
+  // =========================
   // EDIT JOB
   // =========================
 
@@ -202,7 +210,7 @@ const AllPosts = () => {
 
       <div className="jobs-container">
 
-        {/* Loading */}
+        {/* LOADING */}
 
         {loading && (
           <div className="jobs-message">
@@ -217,7 +225,7 @@ const AllPosts = () => {
         )}
 
 
-        {/* Empty */}
+        {/* EMPTY */}
 
         {!loading && posts.length === 0 && (
           <div className="jobs-message">
@@ -255,16 +263,16 @@ const AllPosts = () => {
               <div className="job-card-top">
 
                 <div className="company-logo">
+
                   {p.postProfile
                     ? p.postProfile
                         .charAt(0)
                         .toUpperCase()
                     : "J"}
+
                 </div>
 
                 <div className="job-heading">
-
-                  {/* Dynamic Job Role */}
 
                   <h3 className="job-title">
                     {p.postProfile}
@@ -371,14 +379,21 @@ const AllPosts = () => {
 
               <div className="job-actions">
 
+                {/* VIEW DETAILS */}
+
                 <button
                   className="details-btn"
                   type="button"
+                  onClick={() =>
+                    handleViewDetails(p.postId)
+                  }
                 >
                   View Details
                   <span>→</span>
                 </button>
 
+
+                {/* EDIT + DELETE */}
 
                 <div className="admin-actions">
 

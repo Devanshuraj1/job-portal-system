@@ -4,6 +4,7 @@ import api from "../api/axiosConfig";
 import "./Create.css";
 
 function Create() {
+
   const navigate = useNavigate();
 
   const [job, setJob] = useState({
@@ -13,129 +14,366 @@ function Create() {
     postTechStack: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // =========================
+  // HANDLE INPUT
+  // =========================
+
   const handleChange = (e) => {
+
     setJob({
       ...job,
       [e.target.name]: e.target.value,
     });
+
+    setErrorMessage("");
   };
 
+
+  // =========================
+  // CREATE JOB
+  // =========================
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
+    setErrorMessage("");
+
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    // =========================
+    // LOGIN CHECK
+    // =========================
+
+    if (!token) {
+
+      navigate("/login");
+
+      return;
+    }
+
+
+    // =========================
+    // ROLE CHECK
+    // =========================
+
+    if (
+      role !== "RECRUITER" &&
+      role !== "ADMIN"
+    ) {
+
+      setErrorMessage(
+        "Only recruiters and admins can post jobs."
+      );
+
+      return;
+    }
+
+
+    // =========================
+    // VALIDATION
+    // =========================
+
+    if (
+      !job.postProfile.trim() ||
+      !job.postDesc.trim() ||
+      !job.reqExperience ||
+      !job.postTechStack.trim()
+    ) {
+
+      setErrorMessage(
+        "Please fill all required fields."
+      );
+
+      return;
+    }
+
+
     try {
+
+      setLoading(true);
+
+
+      // =========================
+      // PREPARE DATA
+      // =========================
+
       const jobData = {
-        ...job,
-        reqExperience: Number(job.reqExperience),
-        postTechStack: job.postTechStack
-          .split(",")
-          .map((skill) => skill.trim())
-          .filter((skill) => skill !== ""),
+
+        postProfile:
+          job.postProfile.trim(),
+
+        postDesc:
+          job.postDesc.trim(),
+
+        reqExperience:
+          Number(job.reqExperience),
+
+        postTechStack:
+          job.postTechStack
+            .split(",")
+            .map((skill) => skill.trim())
+            .filter((skill) => skill.length > 0),
+
       };
 
-      await api.post("/jobPost", jobData);
 
-      alert("Job Posted Successfully!");
+      // =========================
+      // API REQUEST
+      // =========================
+
+      const response = await api.post(
+        "/jobPost",
+        jobData
+      );
+
+
+      console.log(
+        "Job Created:",
+        response.data
+      );
+
+
+      // =========================
+      // SUCCESS
+      // =========================
+
+      alert(
+        "Job posted successfully!"
+      );
 
       navigate("/");
+
+
     } catch (error) {
-      console.error(error);
-      alert("Unable to create job.");
+
+      console.error(
+        "Create Job Error:",
+        error
+      );
+
+
+      // =========================
+      // BACKEND ERROR
+      // =========================
+
+      if (error.response) {
+
+        if (
+          typeof error.response.data ===
+          "string"
+        ) {
+
+          setErrorMessage(
+            error.response.data
+          );
+
+        } else {
+
+          setErrorMessage(
+            "Unable to create job."
+          );
+        }
+
+      } else {
+
+        setErrorMessage(
+          "Server error. Please try again."
+        );
+      }
+
+    } finally {
+
+      setLoading(false);
+
     }
   };
 
+
   return (
+
     <div className="create-page">
 
       <div className="create-container">
 
-        <div className="create-header">
-          <h1>Post a Job</h1>
+        {/* =========================
+            HEADER
+        ========================= */}
 
-          <p>
-            Create a new job opportunity and find the right candidate.
-          </p>
+        <div className="create-header">
+
+          <div>
+
+            <p className="create-label">
+              JOB MANAGEMENT
+            </p>
+
+            <h1>
+              Post a new job
+            </h1>
+
+            <p className="create-subtitle">
+              Create a job opportunity and find the
+              right candidate for your organization.
+            </p>
+
+          </div>
+
         </div>
 
-        <form className="create-form" onSubmit={handleSubmit}>
 
-          <div className="form-group">
-            <label>Job Title</label>
+        {/* =========================
+            FORM CARD
+        ========================= */}
 
-            <input
-              type="text"
-              name="postProfile"
-              placeholder="e.g. Java Developer"
-              value={job.postProfile}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className="create-card">
 
-          <div className="form-group">
-            <label>Job Description</label>
+          <form onSubmit={handleSubmit}>
 
-            <textarea
-              name="postDesc"
-              placeholder="Describe the role, responsibilities and requirements..."
-              value={job.postDesc}
-              onChange={handleChange}
-              rows="6"
-              required
-            />
-          </div>
 
-          <div className="form-group">
-            <label>Required Experience</label>
+            {/* ERROR */}
 
-            <input
-              type="number"
-              name="reqExperience"
-              placeholder="e.g. 2"
-              min="0"
-              value={job.reqExperience}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            {errorMessage && (
 
-          <div className="form-group">
-            <label>Technical Skills</label>
+              <div className="create-error">
+                {errorMessage}
+              </div>
 
-            <input
-              type="text"
-              name="postTechStack"
-              placeholder="Java, Spring Boot, React, SQL"
-              value={job.postTechStack}
-              onChange={handleChange}
-              required
-            />
+            )}
 
-            <small>
-              Separate multiple skills using commas.
-            </small>
-          </div>
 
-          <div className="create-actions">
+            {/* =========================
+                JOB TITLE
+            ========================= */}
 
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={() => navigate("/")}
-            >
-              Cancel
-            </button>
+            <div className="create-field">
 
-            <button
-              type="submit"
-              className="create-btn"
-            >
-              Post Job
-            </button>
+              <label htmlFor="postProfile">
+                Job Title
+              </label>
 
-          </div>
+              <input
+                id="postProfile"
+                type="text"
+                name="postProfile"
+                placeholder="e.g. Java Backend Developer"
+                value={job.postProfile}
+                onChange={handleChange}
+              />
 
-        </form>
+            </div>
+
+
+            {/* =========================
+                DESCRIPTION
+            ========================= */}
+
+            <div className="create-field">
+
+              <label htmlFor="postDesc">
+                Job Description
+              </label>
+
+              <textarea
+                id="postDesc"
+                name="postDesc"
+                placeholder="Describe the role, responsibilities and requirements..."
+                value={job.postDesc}
+                onChange={handleChange}
+                rows="6"
+              />
+
+            </div>
+
+
+            {/* =========================
+                EXPERIENCE
+            ========================= */}
+
+            <div className="create-field">
+
+              <label htmlFor="reqExperience">
+                Required Experience
+              </label>
+
+              <input
+                id="reqExperience"
+                type="number"
+                name="reqExperience"
+                placeholder="e.g. 2"
+                min="0"
+                value={job.reqExperience}
+                onChange={handleChange}
+              />
+
+              <small>
+                Enter required experience in years.
+              </small>
+
+            </div>
+
+
+            {/* =========================
+                TECH STACK
+            ========================= */}
+
+            <div className="create-field">
+
+              <label htmlFor="postTechStack">
+                Technical Skills
+              </label>
+
+              <input
+                id="postTechStack"
+                type="text"
+                name="postTechStack"
+                placeholder="Java, Spring Boot, PostgreSQL, Docker"
+                value={job.postTechStack}
+                onChange={handleChange}
+              />
+
+              <small>
+                Separate multiple skills using commas.
+              </small>
+
+            </div>
+
+
+            {/* =========================
+                ACTIONS
+            ========================= */}
+
+            <div className="create-actions">
+
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => navigate("/")}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="create-submit-btn"
+                disabled={loading}
+              >
+
+                {loading
+                  ? "Posting Job..."
+                  : "Post Job"}
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
 
       </div>
 

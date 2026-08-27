@@ -21,6 +21,13 @@ function Register() {
     });
   };
 
+  const handleRoleChange = (role) => {
+    setUser({
+      ...user,
+      role: role,
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -148,34 +155,110 @@ function Register() {
 
             </div>
 
-            {/* ACCOUNT TYPE */}
+
+            {/* =========================
+                ACCOUNT TYPE
+            ========================= */}
+
             <div className="register-field">
 
-              <label htmlFor="role">
+              <label>
                 Account Type
               </label>
 
-              <select
-                id="role"
-                name="role"
-                value={user.role}
-                onChange={handleChange}
-                required
-              >
+              <div className="role-selection">
 
-                <option value="USER">
-                  Job Seeker
-                </option>
+                {/* JOB SEEKER */}
 
-                <option value="RECRUITER">
-                  Recruiter
-                </option>
+                <button
+                  type="button"
+                  className={`role-card ${
+                    user.role === "USER"
+                      ? "role-card-active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    handleRoleChange("USER")
+                  }
+                >
 
-              </select>
+                  <div className="role-icon">
+                    👤
+                  </div>
+
+                  <div className="role-content">
+
+                    <strong>
+                      Job Seeker
+                    </strong>
+
+                    <span>
+                      Find jobs & apply
+                    </span>
+
+                  </div>
+
+                  <div className="role-check">
+                    {user.role === "USER" ? "✓" : ""}
+                  </div>
+
+                </button>
+
+
+                {/* RECRUITER */}
+
+                <button
+                  type="button"
+                  className={`role-card ${
+                    user.role === "RECRUITER"
+                      ? "role-card-active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    handleRoleChange("RECRUITER")
+                  }
+                >
+
+                  <div className="role-icon">
+                    💼
+                  </div>
+
+                  <div className="role-content">
+
+                    <strong>
+                      Recruiter
+                    </strong>
+
+                    <span>
+                      Post jobs & hire
+                    </span>
+
+                  </div>
+
+                  <div className="role-check">
+                    {user.role === "RECRUITER" ? "✓" : ""}
+                  </div>
+
+                </button>
+
+              </div>
+
+              {/* RECRUITER NOTE */}
+
+              {user.role === "RECRUITER" && (
+
+                <p className="recruiter-note">
+                  Recruiter accounts require admin approval
+                  before you can post jobs.
+                </p>
+
+              )}
 
             </div>
 
+
             {/* SUBMIT BUTTON */}
+
             <button
               type="submit"
               className="register-button"
@@ -188,7 +271,9 @@ function Register() {
 
           </form>
 
+
           {/* LOGIN LINK */}
+
           <div className="register-login">
 
             <span>

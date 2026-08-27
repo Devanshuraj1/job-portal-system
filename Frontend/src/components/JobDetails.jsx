@@ -1,22 +1,42 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../api/axiosConfig";
+import axios from "axios";
 import "./JobDetails.css";
 
-const JobDetails = () => {
+function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const response = await api.get(`/jobPost/${id}`);
+        setLoading(true);
+        setError("");
+
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+          `http://localhost:8084/jobPost/${id}`,
+          {
+            headers: token
+              ? {
+                  Authorization: `Bearer ${token}`,
+                }
+              : {},
+          }
+        );
+
+        console.log("Job Details Response:", response.data);
+
         setJob(response.data);
-      } catch (error) {
-        console.error("Error fetching job:", error);
+      } catch (err) {
+        console.error("Failed to fetch job:", err);
+
+        setError("Unable to load job details.");
       } finally {
         setLoading(false);
       }
@@ -25,152 +45,303 @@ const JobDetails = () => {
     fetchJob();
   }, [id]);
 
+  // =========================
+  // LOADING
+  // =========================
+
   if (loading) {
     return (
-      <div className="details-message">
-        <div className="details-loader"></div>
-        <p>Loading job details...</p>
+      <div className="job-details-page">
+
+        <div className="job-details-loading">
+          Loading job details...
+        </div>
+
       </div>
     );
   }
 
-  if (!job) {
+  // =========================
+  // ERROR
+  // =========================
+
+  if (error || !job) {
     return (
-      <div className="details-message">
-        <div className="details-empty-icon">🔎</div>
-        <h2>Job not found</h2>
-        <button
-          className="back-btn"
-          onClick={() => navigate("/")}
-        >
-          ← Back to Jobs
-        </button>
-      </div>
-    );
-  }
+      <div className="job-details-page">
 
-  return (
-    <div className="details-page">
+        <div className="job-details-error">
 
-      {/* Header */}
-      <div className="details-header">
-
-        <button
-          className="back-link"
-          onClick={() => navigate("/")}
-        >
-          ← Back to Jobs
-        </button>
-
-        <div className="details-title-section">
-
-          <div className="details-logo">
-            {job.postProfile?.charAt(0).toUpperCase()}
+          <div className="error-icon">
+            !
           </div>
 
-          <div>
-            <p className="details-label">
-              JOB OPPORTUNITY
+          <h2>
+            Job Not Found
+          </h2>
+
+          <p>
+            The job you're looking for may have been removed
+            or is no longer available.
+          </p>
+
+          <button
+            className="back-button"
+            onClick={() => navigate("/")}
+          >
+            Back to Jobs
+          </button>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  // =========================
+  // JOB DETAILS
+  // =========================
+
+  return (
+    <div className="job-details-page">
+
+      <div className="job-details-container">
+
+        {/* BACK BUTTON */}
+
+        <button
+          className="job-back-link"
+          onClick={() => navigate(-1)}
+        >
+          ← Back to Jobs
+        </button>
+
+
+        {/* MAIN CARD */}
+
+        <div className="job-details-card">
+
+          {/* =========================
+              HEADER
+          ========================= */}
+
+          <div className="job-details-header">
+
+            <div className="job-company-logo">
+
+              {job.postProfile
+                ? job.postProfile
+                    .charAt(0)
+                    .toUpperCase()
+                : "J"}
+
+            </div>
+
+            <div className="job-header-content">
+
+              <h1>
+                {job.postProfile}
+              </h1>
+
+              <p>
+                Job Opportunity
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* =========================
+              JOB META
+          ========================= */}
+
+          <div className="job-meta">
+
+            <div className="job-meta-item">
+
+              <span className="meta-icon">
+                💼
+              </span>
+
+              <div>
+
+                <span className="meta-label">
+                  Experience
+                </span>
+
+                <strong>
+                  {job.reqExperience !== undefined
+                    ? `${job.reqExperience} years`
+                    : "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div className="job-meta-item">
+
+              <span className="meta-icon">
+                📍
+              </span>
+
+              <div>
+
+                <span className="meta-label">
+                  Workplace
+                </span>
+
+                <strong>
+                  {job.location || "Remote / On-site"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div className="job-meta-item">
+
+              <span className="meta-icon">
+                💼
+              </span>
+
+              <div>
+
+                <span className="meta-label">
+                  Job Type
+                </span>
+
+                <strong>
+                  Full Time
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* =========================
+              DESCRIPTION
+          ========================= */}
+
+          <div className="job-content-section">
+
+            <h2>
+              Job Description
+            </h2>
+
+            <p className="job-description">
+              {job.postDesc ||
+                "No description available."}
             </p>
 
-            <h1>{job.postProfile}</h1>
+          </div>
 
-            <p className="details-subtitle">
-              Full-time · On-site
-            </p>
+
+          {/* =========================
+              TECHNICAL SKILLS
+          ========================= */}
+
+          <div className="job-content-section">
+
+            <h2>
+              Technical Skills
+            </h2>
+
+            <div className="skills-list">
+
+              {Array.isArray(job.postTechStack) &&
+              job.postTechStack.length > 0 ? (
+
+                job.postTechStack.map(
+                  (skill, index) => (
+
+                    <span
+                      className="skill-tag"
+                      key={index}
+                    >
+                      {skill}
+                    </span>
+
+                  )
+                )
+
+              ) : (
+
+                <p className="job-description">
+                  No technical skills specified.
+                </p>
+
+              )}
+
+            </div>
+
+          </div>
+
+
+          {/* =========================
+              JOB INFO
+          ========================= */}
+
+          <div className="job-info-box">
+
+            <div>
+
+              <span>
+                Job ID
+              </span>
+
+              <strong>
+                #{job.postId}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Status
+              </span>
+
+              <strong className="active-status">
+                Active
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          {/* =========================
+              ACTIONS
+          ========================= */}
+
+          <div className="job-details-actions">
+
+            <button
+              className="apply-button"
+              onClick={() =>
+                alert(
+                  "Application feature coming soon!"
+                )
+              }
+            >
+              Apply Now
+            </button>
+
           </div>
 
         </div>
 
       </div>
 
-      {/* Main Content */}
-      <div className="details-container">
-
-        {/* Left */}
-        <main className="details-main">
-
-          <section className="details-section">
-
-            <h2>About this role</h2>
-
-            <p>
-              {job.postDesc}
-            </p>
-
-          </section>
-
-          <section className="details-section">
-
-            <h2>Required Skills</h2>
-
-            <div className="details-skills">
-
-              {job.postTechStack?.map(
-                (skill, index) => (
-                  <span
-                    className="details-skill"
-                    key={index}
-                  >
-                    {skill}
-                  </span>
-                )
-              )}
-
-            </div>
-
-          </section>
-
-        </main>
-
-        {/* Right */}
-        <aside className="details-sidebar">
-
-          <div className="details-card">
-
-            <h3>Job Overview</h3>
-
-            <div className="overview-item">
-              <span>💼</span>
-
-              <div>
-                <small>Experience</small>
-                <strong>
-                  {job.reqExperience} years
-                </strong>
-              </div>
-            </div>
-
-            <div className="overview-item">
-              <span>🧑‍💻</span>
-
-              <div>
-                <small>Employment</small>
-                <strong>Full-time</strong>
-              </div>
-            </div>
-
-            <div className="overview-item">
-              <span>📍</span>
-
-              <div>
-                <small>Workplace</small>
-                <strong>On-site</strong>
-              </div>
-            </div>
-
-            <button className="apply-btn">
-              Apply for this Job →
-            </button>
-
-          </div>
-
-        </aside>
-
-      </div>
-
     </div>
   );
-};
+}
 
 export default JobDetails;

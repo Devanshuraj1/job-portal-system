@@ -10,10 +10,10 @@ import com.dev.springbootrest.model.User;
 @Repository
 public interface UserRepo extends JpaRepository<User, Integer> {
 
+    // Find user by username
     User findByUsername(String username);
 
-    List<User> findByRole(String role);
-
+    // Find pending recruiters
     List<User> findByRoleAndRecruiterStatus(
             String role,
             String recruiterStatus

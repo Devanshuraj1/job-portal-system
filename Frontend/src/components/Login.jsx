@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import "./Login.css";
 
 function Login() {
+
   const navigate = useNavigate();
 
   const [user, setUser] = useState({
@@ -14,108 +15,259 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState("");
+
+
+  // =========================
+  // HANDLE INPUT
+  // =========================
+
   const handleChange = (e) => {
+
     setUser({
       ...user,
       [e.target.name]: e.target.value,
     });
+
+    setErrorMessage("");
   };
 
+
+  // =========================
+  // LOGIN
+  // =========================
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
+    setErrorMessage("");
+
     try {
+
       setLoading(true);
 
       const response = await login(user);
 
       console.log("JWT Token:", response.data);
 
-      // Save JWT Token
+
+      // =========================
+      // SAVE TOKEN
+      // =========================
+
       const token = response.data;
 
-      localStorage.setItem("token", token);
+      localStorage.setItem(
+        "token",
+        token
+      );
 
-      // Decode JWT
+
+      // =========================
+      // DECODE JWT
+      // =========================
+
       const decodedToken = jwtDecode(token);
 
-      console.log("Decoded JWT:", decodedToken);
+      console.log(
+        "Decoded JWT:",
+        decodedToken
+      );
 
-      // Get username and role from JWT
-      const username = decodedToken.sub;
-      const role = decodedToken.role;
 
-      console.log("Username:", username);
-      console.log("Role:", role);
+      // =========================
+      // GET USER INFO
+      // =========================
 
-      // Save user information
-      localStorage.setItem("username", username);
-      localStorage.setItem("role", role);
+      const username =
+        decodedToken.sub;
 
-      alert("Login Successful!");
+      const role =
+        decodedToken.role;
+
+
+      console.log(
+        "Username:",
+        username
+      );
+
+      console.log(
+        "Role:",
+        role
+      );
+
+
+      // =========================
+      // SAVE USER INFO
+      // =========================
+
+      localStorage.setItem(
+        "username",
+        username
+      );
+
+      localStorage.setItem(
+        "role",
+        role
+      );
+
+
+      // =========================
+      // SUCCESS
+      // =========================
 
       navigate("/");
 
-    } catch (error) {
-      console.error(error);
 
-      alert("Invalid Username or Password!");
+    } catch (error) {
+
+      console.error(
+        "Login Error:",
+        error
+      );
+
+
+      // =========================
+      // GET BACKEND MESSAGE
+      // =========================
+
+      const backendMessage =
+        error?.response?.data;
+
+
+      if (
+        typeof backendMessage === "string" &&
+        backendMessage.toLowerCase().includes("pending")
+      ) {
+
+        setErrorMessage(
+          "Your recruiter account is waiting for admin approval."
+        );
+
+      }
+
+      else if (
+        typeof backendMessage === "string" &&
+        backendMessage.toLowerCase().includes("rejected")
+      ) {
+
+        setErrorMessage(
+          "Your recruiter account has been rejected."
+        );
+
+      }
+
+      else {
+
+        setErrorMessage(
+          "Invalid username or password."
+        );
+
+      }
 
     } finally {
+
       setLoading(false);
+
     }
   };
 
+
   return (
+
     <div className="login-page">
 
       <div className="login-card">
 
-        {/* LEFT SIDE */}
+
+        {/* =========================
+            LEFT SIDE
+        ========================= */}
+
         <div className="login-brand">
 
           <div className="brand-logo">
             J
           </div>
 
-          <h1>Welcome back.</h1>
+          <h1>
+            Welcome back.
+          </h1>
 
           <p>
-            Find your next opportunity and take the
-            next step in your career.
+            Find your next opportunity and take
+            the next step in your career.
           </p>
+
 
           <div className="login-points">
 
             <div>
               <span>✓</span>
-              <p>Discover better job opportunities</p>
+
+              <p>
+                Discover better job opportunities
+              </p>
             </div>
+
 
             <div>
               <span>✓</span>
-              <p>Connect with recruiters</p>
+
+              <p>
+                Connect with recruiters
+              </p>
             </div>
+
 
             <div>
               <span>✓</span>
-              <p>Build your professional profile</p>
+
+              <p>
+                Build your professional profile
+              </p>
             </div>
 
           </div>
 
         </div>
 
-        {/* RIGHT SIDE */}
+
+        {/* =========================
+            RIGHT SIDE
+        ========================= */}
+
         <div className="login-form-section">
 
-          <h2>Sign in</h2>
+          <h2>
+            Sign in
+          </h2>
 
           <p className="login-description">
             Enter your credentials to access your account.
           </p>
 
+
+          {/* =========================
+              ERROR MESSAGE
+          ========================= */}
+
+          {errorMessage && (
+
+            <div className="login-error">
+
+              {errorMessage}
+
+            </div>
+
+          )}
+
+
           <form onSubmit={handleSubmit}>
+
+
+            {/* USERNAME */}
 
             <div className="login-field">
 
@@ -135,6 +287,9 @@ function Login() {
 
             </div>
 
+
+            {/* PASSWORD */}
+
             <div className="login-field">
 
               <label htmlFor="password">
@@ -153,19 +308,31 @@ function Login() {
 
             </div>
 
+
+            {/* LOGIN BUTTON */}
+
             <button
               type="submit"
               className="login-button"
               disabled={loading}
             >
-              {loading ? "Signing in..." : "Sign in"}
+
+              {loading
+                ? "Signing in..."
+                : "Sign in"}
+
             </button>
 
           </form>
 
+
+          {/* REGISTER */}
+
           <div className="login-register">
 
-            <span>Don't have an account?</span>
+            <span>
+              Don't have an account?
+            </span>
 
             <Link to="/register">
               Create an account
