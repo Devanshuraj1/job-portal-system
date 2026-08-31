@@ -34,32 +34,35 @@ public class JobRestController {
     private UserRepo userRepo;
 
 
-    // =========================
+    // =====================================================
     // GET ALL JOBS
-    // Public
-    // =========================
+    // PUBLIC
+    // =====================================================
 
     @GetMapping("/jobPosts")
     public List<JobPost> getAllJobs() {
+
         return service.getAllJobs();
     }
 
 
-    // =========================
+    // =====================================================
     // GET SINGLE JOB
-    // Public
-    // =========================
+    // PUBLIC
+    // =====================================================
 
     @GetMapping("/jobPost/{postId}")
-    public JobPost getJob(@PathVariable int postId) {
+    public JobPost getJob(
+            @PathVariable int postId) {
+
         return service.getJob(postId);
     }
 
 
-    // =========================
+    // =====================================================
     // SEARCH JOB
-    // Public
-    // =========================
+    // PUBLIC
+    // =====================================================
 
     @GetMapping("/jobPosts/keyword/{keyword}")
     public List<JobPost> searchByKeyword(
@@ -69,53 +72,127 @@ public class JobRestController {
     }
 
 
-    // =========================
+    // =====================================================
     // ADD JOB
     // RECRUITER + ADMIN
-    // =========================
+    // =====================================================
 
     @PostMapping("/jobPost")
     public ResponseEntity<?> addJob(
             @RequestBody JobPost jobPost,
             Authentication authentication) {
 
-        // Get logged-in username from JWT
-        String username = authentication.getName();
+        if (authentication == null) {
 
-        // Find user in database
-        User user = userRepo.findByUsername(username);
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Authentication required");
+        }
+
+        String username =
+                authentication.getName();
+
+        User user =
+                userRepo.findByUsername(username);
 
         if (user == null) {
+
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body("User not found");
         }
 
 
-        // ADMIN can directly post job
+        // ADMIN
         if ("ADMIN".equals(user.getRole())) {
+
+            jobPost.setPostedBy(username);
 
             service.addJob(jobPost);
 
-            return ResponseEntity.ok(
-                    service.getJob(jobPost.getPostId())
-            );
+            return ResponseEntity.ok(jobPost);
         }
 
 
-        // Recruiter check
+        // RECRUITER
         if ("RECRUITER".equals(user.getRole())) {
 
-            // Check recruiter approval
-            if (!"APPROVED".equals(user.getRecruiterStatus())) {
+            if (!"APPROVED".equals(
+                    user.getRecruiterStatus())) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body("Recruiter is not approved by Admin");
+                        .body(
+                                "Recruiter is not approved by Admin"
+                        );
             }
 
-            // Approved recruiter can post
+            jobPost.setPostedBy(username);
+
             service.addJob(jobPost);
+
+            return ResponseEntity.ok(jobPost);
+        }
+
+
+        // NORMAL USER
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(
+                        "Only approved recruiters or admin can post jobs"
+                );
+    }
+
+
+    // =====================================================
+    // UPDATE JOB
+    // RECRUITER + ADMIN
+    //
+    // IMPORTANT:
+    // PUT /jobPost
+    // postId request body ke andar jayega
+    // =====================================================
+
+    @PutMapping("/jobPost")
+    public ResponseEntity<?> updateJob(
+            @RequestBody JobPost jobPost,
+            Authentication authentication) {
+
+        if (authentication == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Authentication required");
+        }
+
+        if (jobPost.getPostId() <= 0) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body("Valid postId is required");
+        }
+
+        String username =
+                authentication.getName();
+
+        User user =
+                userRepo.findByUsername(username);
+
+        if (user == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("User not found");
+        }
+
+
+        // =================================================
+        // ADMIN CAN EDIT ANY JOB
+        // =================================================
+
+        if ("ADMIN".equals(user.getRole())) {
+
+            service.updateJob(jobPost);
 
             return ResponseEntity.ok(
                     service.getJob(jobPost.getPostId())
@@ -123,43 +200,167 @@ public class JobRestController {
         }
 
 
-        // Normal USER cannot post
+        // =================================================
+        // RECRUITER
+        // =================================================
+
+        if ("RECRUITER".equals(user.getRole())) {
+
+            if (!"APPROVED".equals(
+                    user.getRecruiterStatus())) {
+
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(
+                                "Recruiter is not approved by Admin"
+                        );
+            }
+
+
+            JobPost existingJob =
+                    service.getJob(
+                            jobPost.getPostId()
+                    );
+
+            if (existingJob == null) {
+
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("Job not found");
+            }
+
+
+            // Recruiter can edit only own job
+            if (!username.equals(
+                    existingJob.getPostedBy())) {
+
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(
+                                "You can edit only your own jobs"
+                        );
+            }
+
+
+            // Keep original owner
+            jobPost.setPostedBy(username);
+
+            service.updateJob(jobPost);
+
+            return ResponseEntity.ok(
+                    service.getJob(jobPost.getPostId())
+            );
+        }
+
+
+        // =================================================
+        // NORMAL USER
+        // =================================================
+
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body("Only approved recruiters or admin can post jobs");
+                .body(
+                        "Only recruiter or admin can edit jobs"
+                );
     }
 
 
-    // =========================
-    // UPDATE JOB
-    // =========================
-
-    @PutMapping("/jobPost")
-    public JobPost updateJob(
-            @RequestBody JobPost jobPost) {
-
-        service.updateJob(jobPost);
-
-        return service.getJob(jobPost.getPostId());
-    }
-
-
-    // =========================
+    // =====================================================
     // DELETE JOB
-    // =========================
+    // RECRUITER + ADMIN
+    // =====================================================
 
     @DeleteMapping("/jobPost/{postId}")
-    public String deleteJob(@PathVariable int postId) {
+    public ResponseEntity<?> deleteJob(
+            @PathVariable int postId,
+            Authentication authentication) {
 
-        service.deleteJob(postId);
+        if (authentication == null) {
 
-        return "Deleted";
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Authentication required");
+        }
+
+        String username =
+                authentication.getName();
+
+        User user =
+                userRepo.findByUsername(username);
+
+        if (user == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("User not found");
+        }
+
+
+        JobPost job =
+                service.getJob(postId);
+
+        if (job == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Job not found");
+        }
+
+
+        // ADMIN
+        if ("ADMIN".equals(user.getRole())) {
+
+            service.deleteJob(postId);
+
+            return ResponseEntity.ok(
+                    "Job deleted successfully"
+            );
+        }
+
+
+        // RECRUITER
+        if ("RECRUITER".equals(user.getRole())) {
+
+            if (!"APPROVED".equals(
+                    user.getRecruiterStatus())) {
+
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(
+                                "Recruiter is not approved by Admin"
+                        );
+            }
+
+
+            if (!username.equals(
+                    job.getPostedBy())) {
+
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(
+                                "You can delete only your own jobs"
+                        );
+            }
+
+            service.deleteJob(postId);
+
+            return ResponseEntity.ok(
+                    "Job deleted successfully"
+            );
+        }
+
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(
+                        "Only recruiter or admin can delete jobs"
+                );
     }
 
 
-    // =========================
+    // =====================================================
     // LOAD DATA
-    // =========================
+    // =====================================================
 
     @GetMapping("/load")
     public String loadData() {

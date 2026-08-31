@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import "./JobDetails.css";
 
 function JobDetails() {
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -11,46 +12,114 @@ function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+
+  // =========================
+  // FETCH JOB
+  // =========================
+
   useEffect(() => {
+
     const fetchJob = async () => {
+
       try {
+
         setLoading(true);
         setError("");
 
-        const token = localStorage.getItem("token");
+        const response =
+          await api.get(
+            `/jobPost/${id}`
+          );
 
-        const response = await axios.get(
-          `http://localhost:8084/jobPost/${id}`,
-          {
-            headers: token
-              ? {
-                  Authorization: `Bearer ${token}`,
-                }
-              : {},
-          }
+        console.log(
+          "Job Details:",
+          response.data
         );
 
-        console.log("Job Details Response:", response.data);
-
         setJob(response.data);
-      } catch (err) {
-        console.error("Failed to fetch job:", err);
 
-        setError("Unable to load job details.");
+      } catch (err) {
+
+        console.error(
+          "Failed to fetch job:",
+          err
+        );
+
+        setError(
+          "Unable to load job details."
+        );
+
       } finally {
+
         setLoading(false);
+
       }
     };
 
+
     fetchJob();
+
   }, [id]);
+
+
+  // =========================
+  // FORMAT WORKPLACE
+  // =========================
+
+  const formatWorkplace = (workplace) => {
+
+    if (!workplace) {
+      return "Not specified";
+    }
+
+    if (workplace === "ON_SITE") {
+      return "On-site";
+    }
+
+    if (workplace === "REMOTE") {
+      return "Remote";
+    }
+
+    if (workplace === "HYBRID") {
+      return "Hybrid";
+    }
+
+    return workplace;
+
+  };
+
+
+  // =========================
+  // FORMAT JOB TYPE
+  // =========================
+
+  const formatJobType = (jobType) => {
+
+    if (!jobType) {
+      return "Not specified";
+    }
+
+    if (jobType === "FULL_TIME") {
+      return "Full Time";
+    }
+
+    if (jobType === "INTERNSHIP") {
+      return "Internship";
+    }
+
+    return jobType;
+
+  };
+
 
   // =========================
   // LOADING
   // =========================
 
   if (loading) {
+
     return (
+
       <div className="job-details-page">
 
         <div className="job-details-loading">
@@ -58,15 +127,20 @@ function JobDetails() {
         </div>
 
       </div>
+
     );
+
   }
+
 
   // =========================
   // ERROR
   // =========================
 
   if (error || !job) {
+
     return (
+
       <div className="job-details-page">
 
         <div className="job-details-error">
@@ -80,13 +154,15 @@ function JobDetails() {
           </h2>
 
           <p>
-            The job you're looking for may have been removed
-            or is no longer available.
+            The job you're looking for may have
+            been removed or is no longer available.
           </p>
 
           <button
             className="back-button"
-            onClick={() => navigate("/")}
+            onClick={() =>
+              navigate("/")
+            }
           >
             Back to Jobs
           </button>
@@ -94,23 +170,30 @@ function JobDetails() {
         </div>
 
       </div>
+
     );
+
   }
+
 
   // =========================
   // JOB DETAILS
   // =========================
 
   return (
+
     <div className="job-details-page">
 
       <div className="job-details-container">
 
-        {/* BACK BUTTON */}
+
+        {/* BACK */}
 
         <button
           className="job-back-link"
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            navigate(-1)
+          }
         >
           ← Back to Jobs
         </button>
@@ -120,21 +203,32 @@ function JobDetails() {
 
         <div className="job-details-card">
 
+
           {/* =========================
               HEADER
           ========================= */}
 
           <div className="job-details-header">
 
+
             <div className="job-company-logo">
 
-              {job.postProfile
-                ? job.postProfile
+              {job.companyName
+
+                ? job.companyName
                     .charAt(0)
                     .toUpperCase()
-                : "J"}
+
+                : job.postProfile
+
+                  ? job.postProfile
+                      .charAt(0)
+                      .toUpperCase()
+
+                  : "J"}
 
             </div>
+
 
             <div className="job-header-content">
 
@@ -143,7 +237,8 @@ function JobDetails() {
               </h1>
 
               <p>
-                Job Opportunity
+                {job.companyName ||
+                  "Company not specified"}
               </p>
 
             </div>
@@ -156,6 +251,9 @@ function JobDetails() {
           ========================= */}
 
           <div className="job-meta">
+
+
+            {/* EXPERIENCE */}
 
             <div className="job-meta-item">
 
@@ -170,15 +268,48 @@ function JobDetails() {
                 </span>
 
                 <strong>
-                  {job.reqExperience !== undefined
+
+                  {job.reqExperience !==
+                    undefined &&
+                   job.reqExperience !==
+                    null
+
                     ? `${job.reqExperience} years`
+
                     : "Not specified"}
+
                 </strong>
 
               </div>
 
             </div>
 
+
+            {/* SALARY */}
+
+            <div className="job-meta-item">
+
+              <span className="meta-icon">
+                💰
+              </span>
+
+              <div>
+
+                <span className="meta-label">
+                  Salary
+                </span>
+
+                <strong>
+                  {job.salary ||
+                    "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* WORKPLACE */}
 
             <div className="job-meta-item">
 
@@ -193,7 +324,9 @@ function JobDetails() {
                 </span>
 
                 <strong>
-                  {job.location || "Remote / On-site"}
+                  {formatWorkplace(
+                    job.workplace
+                  )}
                 </strong>
 
               </div>
@@ -201,10 +334,12 @@ function JobDetails() {
             </div>
 
 
+            {/* JOB TYPE */}
+
             <div className="job-meta-item">
 
               <span className="meta-icon">
-                💼
+                🏷️
               </span>
 
               <div>
@@ -214,7 +349,9 @@ function JobDetails() {
                 </span>
 
                 <strong>
-                  Full Time
+                  {formatJobType(
+                    job.jobType
+                  )}
                 </strong>
 
               </div>
@@ -235,8 +372,10 @@ function JobDetails() {
             </h2>
 
             <p className="job-description">
+
               {job.postDesc ||
                 "No description available."}
+
             </p>
 
           </div>
@@ -254,8 +393,11 @@ function JobDetails() {
 
             <div className="skills-list">
 
-              {Array.isArray(job.postTechStack) &&
-              job.postTechStack.length > 0 ? (
+              {Array.isArray(
+                job.postTechStack
+              ) &&
+              job.postTechStack.length >
+                0 ? (
 
                 job.postTechStack.map(
                   (skill, index) => (
@@ -268,6 +410,7 @@ function JobDetails() {
                     </span>
 
                   )
+
                 )
 
               ) : (
@@ -284,10 +427,11 @@ function JobDetails() {
 
 
           {/* =========================
-              JOB INFO
+              POSTED INFORMATION
           ========================= */}
 
           <div className="job-info-box">
+
 
             <div>
 
@@ -297,6 +441,20 @@ function JobDetails() {
 
               <strong>
                 #{job.postId}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Posted By
+              </span>
+
+              <strong>
+                {job.postedBy ||
+                  "JobPortal"}
               </strong>
 
             </div>
@@ -318,7 +476,7 @@ function JobDetails() {
 
 
           {/* =========================
-              ACTIONS
+              ACTION
           ========================= */}
 
           <div className="job-details-actions">
@@ -341,6 +499,7 @@ function JobDetails() {
       </div>
 
     </div>
+
   );
 }
 

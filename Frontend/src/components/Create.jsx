@@ -12,10 +12,15 @@ function Create() {
     postDesc: "",
     reqExperience: "",
     postTechStack: "",
+    companyName: "",
+    salary: "",
+    workplace: "REMOTE",
+    jobType: "FULL_TIME",
   });
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
 
   // =========================
   // HANDLE INPUT
@@ -44,6 +49,7 @@ function Create() {
 
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
+
 
     // =========================
     // LOGIN CHECK
@@ -82,7 +88,11 @@ function Create() {
       !job.postProfile.trim() ||
       !job.postDesc.trim() ||
       !job.reqExperience ||
-      !job.postTechStack.trim()
+      !job.postTechStack.trim() ||
+      !job.companyName.trim() ||
+      !job.salary.trim() ||
+      !job.workplace ||
+      !job.jobType
     ) {
 
       setErrorMessage(
@@ -117,7 +127,21 @@ function Create() {
           job.postTechStack
             .split(",")
             .map((skill) => skill.trim())
-            .filter((skill) => skill.length > 0),
+            .filter(
+              (skill) => skill.length > 0
+            ),
+
+        companyName:
+          job.companyName.trim(),
+
+        salary:
+          job.salary.trim(),
+
+        workplace:
+          job.workplace,
+
+        jobType:
+          job.jobType,
 
       };
 
@@ -235,7 +259,9 @@ function Create() {
           <form onSubmit={handleSubmit}>
 
 
-            {/* ERROR */}
+            {/* =========================
+                ERROR
+            ========================= */}
 
             {errorMessage && (
 
@@ -244,6 +270,29 @@ function Create() {
               </div>
 
             )}
+
+
+            {/* =========================
+                COMPANY NAME
+            ========================= */}
+
+            <div className="create-field">
+
+              <label htmlFor="companyName">
+                Company Name
+              </label>
+
+              <input
+                id="companyName"
+                type="text"
+                name="companyName"
+                placeholder="e.g. Google, Microsoft, Infosys"
+                value={job.companyName}
+                onChange={handleChange}
+                required
+              />
+
+            </div>
 
 
             {/* =========================
@@ -263,7 +312,133 @@ function Create() {
                 placeholder="e.g. Java Backend Developer"
                 value={job.postProfile}
                 onChange={handleChange}
+                required
               />
+
+            </div>
+
+
+            {/* =========================
+                JOB TYPE + WORKPLACE
+            ========================= */}
+
+            <div className="create-form-row">
+
+
+              {/* JOB TYPE */}
+
+              <div className="create-field">
+
+                <label htmlFor="jobType">
+                  Job Type
+                </label>
+
+                <select
+                  id="jobType"
+                  name="jobType"
+                  value={job.jobType}
+                  onChange={handleChange}
+                >
+
+                  <option value="FULL_TIME">
+                    Full Time
+                  </option>
+
+                  <option value="INTERNSHIP">
+                    Internship
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              {/* WORKPLACE */}
+
+              <div className="create-field">
+
+                <label htmlFor="workplace">
+                  Workplace
+                </label>
+
+                <select
+                  id="workplace"
+                  name="workplace"
+                  value={job.workplace}
+                  onChange={handleChange}
+                >
+
+                  <option value="REMOTE">
+                    Remote
+                  </option>
+
+                  <option value="ON_SITE">
+                    On-site
+                  </option>
+
+                  <option value="HYBRID">
+                    Hybrid
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+
+            {/* =========================
+                SALARY + EXPERIENCE
+            ========================= */}
+
+            <div className="create-form-row">
+
+
+              {/* SALARY */}
+
+              <div className="create-field">
+
+                <label htmlFor="salary">
+                  Salary
+                </label>
+
+                <input
+                  id="salary"
+                  type="text"
+                  name="salary"
+                  placeholder="e.g. ₹8-12 LPA"
+                  value={job.salary}
+                  onChange={handleChange}
+                  required
+                />
+
+              </div>
+
+
+              {/* EXPERIENCE */}
+
+              <div className="create-field">
+
+                <label htmlFor="reqExperience">
+                  Required Experience
+                </label>
+
+                <input
+                  id="reqExperience"
+                  type="number"
+                  name="reqExperience"
+                  placeholder="e.g. 2"
+                  min="0"
+                  value={job.reqExperience}
+                  onChange={handleChange}
+                  required
+                />
+
+                <small>
+                  Enter experience in years.
+                </small>
+
+              </div>
 
             </div>
 
@@ -281,38 +456,12 @@ function Create() {
               <textarea
                 id="postDesc"
                 name="postDesc"
-                placeholder="Describe the role, responsibilities and requirements..."
+                placeholder="Describe the role, responsibilities, requirements and qualifications..."
                 value={job.postDesc}
                 onChange={handleChange}
-                rows="6"
+                rows="7"
+                required
               />
-
-            </div>
-
-
-            {/* =========================
-                EXPERIENCE
-            ========================= */}
-
-            <div className="create-field">
-
-              <label htmlFor="reqExperience">
-                Required Experience
-              </label>
-
-              <input
-                id="reqExperience"
-                type="number"
-                name="reqExperience"
-                placeholder="e.g. 2"
-                min="0"
-                value={job.reqExperience}
-                onChange={handleChange}
-              />
-
-              <small>
-                Enter required experience in years.
-              </small>
 
             </div>
 
@@ -334,6 +483,7 @@ function Create() {
                 placeholder="Java, Spring Boot, PostgreSQL, Docker"
                 value={job.postTechStack}
                 onChange={handleChange}
+                required
               />
 
               <small>

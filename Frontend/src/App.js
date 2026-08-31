@@ -27,117 +27,78 @@ function App() {
 
       <Routes>
 
-
-        {/* =========================
-            HOME
-        ========================= */}
+        {/* HOME */}
 
         <Route
           path="/"
           element={<AllPosts />}
         />
 
-
-        {/* =========================
-            LOGIN
-        ========================= */}
+        {/* LOGIN */}
 
         <Route
           path="/login"
           element={<Login />}
         />
 
-
-        {/* =========================
-            REGISTER
-        ========================= */}
+        {/* REGISTER */}
 
         <Route
           path="/register"
           element={<Register />}
         />
 
-
-        {/* =========================
-            JOB DETAILS
-        ========================= */}
+        {/* JOB DETAILS */}
 
         <Route
           path="/job/:id"
           element={<JobDetails />}
         />
 
-
-        {/* =========================
-            CREATE JOB
-            RECRUITER + ADMIN
-        ========================= */}
+        {/* CREATE JOB */}
 
         <Route
           path="/create"
           element={
-
             <ProtectedRoute
               allowedRoles={[
                 "RECRUITER",
                 "ADMIN"
               ]}
             >
-
               <Create />
-
             </ProtectedRoute>
-
           }
         />
 
-
-        {/* =========================
-            EDIT JOB
-            RECRUITER + ADMIN
-        ========================= */}
+        {/* EDIT JOB */}
 
         <Route
           path="/edit"
           element={
-
             <ProtectedRoute
               allowedRoles={[
                 "RECRUITER",
                 "ADMIN"
               ]}
             >
-
               <Edit />
-
             </ProtectedRoute>
-
           }
         />
 
-
-        {/* =========================
-            ADMIN DASHBOARD
-            ADMIN ONLY
-        ========================= */}
+        {/* ADMIN DASHBOARD */}
 
         <Route
           path="/admin"
           element={
-
             <ProtectedRoute
-              allowedRoles={[
-                "ADMIN"
-              ]}
+              allowedRoles={["ADMIN"]}
             >
-
               <AdminDashboard />
-
             </ProtectedRoute>
-
           }
         />
-
 
       </Routes>
 
