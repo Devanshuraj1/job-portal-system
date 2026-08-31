@@ -12,6 +12,14 @@ function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // =========================
+  // APPLY STATES
+  // =========================
+
+  const [applying, setApplying] = useState(false);
+  const [applied, setApplied] = useState(false);
+  const [applyMessage, setApplyMessage] = useState("");
+
 
   // =========================
   // FETCH JOB
@@ -27,9 +35,7 @@ function JobDetails() {
         setError("");
 
         const response =
-          await api.get(
-            `/jobPost/${id}`
-          );
+          await api.get(`/jobPost/${id}`);
 
         console.log(
           "Job Details:",
@@ -60,6 +66,122 @@ function JobDetails() {
     fetchJob();
 
   }, [id]);
+
+
+  // =========================
+  // APPLY FOR JOB
+  // =========================
+
+  const handleApply = async () => {
+
+    try {
+
+      setApplying(true);
+      setApplyMessage("");
+
+      console.log(
+        "Applying for Job ID:",
+        job.postId
+      );
+
+
+      // =====================================================
+      // APPLY API
+      // =====================================================
+
+      const response = await api.post(
+        `/applications/apply/${job.postId}`
+      );
+
+
+      console.log(
+        "APPLICATION RESPONSE:",
+        response.data
+      );
+
+
+      setApplied(true);
+
+      setApplyMessage(
+        "Application submitted successfully!"
+      );
+
+
+    } catch (err) {
+
+      console.error(
+        "APPLICATION ERROR:",
+        err
+      );
+
+      console.error(
+        "STATUS:",
+        err.response?.status
+      );
+
+      console.error(
+        "RESPONSE:",
+        err.response?.data
+      );
+
+
+      // =====================================================
+      // NOT LOGGED IN
+      // =====================================================
+
+      if (err.response?.status === 401) {
+
+        setApplyMessage(
+          "Please login before applying for a job."
+        );
+
+      }
+
+      // =====================================================
+      // FORBIDDEN
+      // =====================================================
+
+      else if (err.response?.status === 403) {
+
+        setApplyMessage(
+          "You are not authorized to apply for this job."
+        );
+
+      }
+
+      // =====================================================
+      // DUPLICATE APPLICATION
+      // =====================================================
+
+      else if (err.response?.status === 409) {
+
+        setApplied(true);
+
+        setApplyMessage(
+          "You have already applied for this job."
+        );
+
+      }
+
+      // =====================================================
+      // OTHER ERROR
+      // =====================================================
+
+      else {
+
+        setApplyMessage(
+          err.response?.data ||
+          "Failed to submit application. Please try again."
+        );
+
+      }
+
+    } finally {
+
+      setApplying(false);
+
+    }
+  };
 
 
   // =========================
@@ -476,23 +598,41 @@ function JobDetails() {
 
 
           {/* =========================
-              ACTION
+              APPLY ACTION
           ========================= */}
 
           <div className="job-details-actions">
 
             <button
               className="apply-button"
-              onClick={() =>
-                alert(
-                  "Application feature coming soon!"
-                )
-              }
+              onClick={handleApply}
+              disabled={applying || applied}
             >
-              Apply Now
+
+              {applying
+                ? "Applying..."
+                : applied
+                  ? "Applied ✓"
+                  : "Apply Now"}
+
             </button>
 
           </div>
+
+
+          {/* =========================
+              APPLY MESSAGE
+          ========================= */}
+
+          {applyMessage && (
+
+            <div className="apply-message">
+
+              {applyMessage}
+
+            </div>
+
+          )}
 
         </div>
 

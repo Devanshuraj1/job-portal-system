@@ -74,7 +74,7 @@ public class JobRestController {
 
     // =====================================================
     // ADD JOB
-    // RECRUITER + ADMIN
+    // ADMIN + APPROVED RECRUITER
     // =====================================================
 
     @PostMapping("/jobPost")
@@ -82,18 +82,9 @@ public class JobRestController {
             @RequestBody JobPost jobPost,
             Authentication authentication) {
 
-        if (authentication == null) {
+        String username = authentication.getName();
 
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("Authentication required");
-        }
-
-        String username =
-                authentication.getName();
-
-        User user =
-                userRepo.findByUsername(username);
+        User user = userRepo.findByUsername(username);
 
         if (user == null) {
 
@@ -103,54 +94,64 @@ public class JobRestController {
         }
 
 
+        // -------------------------------------------------
         // ADMIN
-        if ("ADMIN".equals(user.getRole())) {
+        // -------------------------------------------------
+
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
 
             jobPost.setPostedBy(username);
 
             service.addJob(jobPost);
 
-            return ResponseEntity.ok(jobPost);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(service.getJob(jobPost.getPostId()));
         }
 
 
+        // -------------------------------------------------
         // RECRUITER
-        if ("RECRUITER".equals(user.getRole())) {
+        // -------------------------------------------------
 
-            if (!"APPROVED".equals(
+        if ("RECRUITER".equalsIgnoreCase(user.getRole())) {
+
+            if (!"APPROVED".equalsIgnoreCase(
                     user.getRecruiterStatus())) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body(
-                                "Recruiter is not approved by Admin"
-                        );
+                        .body("Recruiter is not approved by Admin");
             }
 
+
+            // Always set owner from logged-in user
             jobPost.setPostedBy(username);
 
             service.addJob(jobPost);
 
-            return ResponseEntity.ok(jobPost);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(service.getJob(jobPost.getPostId()));
         }
 
 
+        // -------------------------------------------------
         // NORMAL USER
+        // -------------------------------------------------
+
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(
-                        "Only approved recruiters or admin can post jobs"
-                );
+                .body("Only Admin or approved Recruiter can post jobs");
     }
 
 
     // =====================================================
     // UPDATE JOB
-    // RECRUITER + ADMIN
     //
-    // IMPORTANT:
-    // PUT /jobPost
-    // postId request body ke andar jayega
+    // ADMIN     -> ANY JOB
+    // RECRUITER -> ONLY OWN JOB
+    // USER      -> NO ACCESS
     // =====================================================
 
     @PutMapping("/jobPost")
@@ -158,25 +159,31 @@ public class JobRestController {
             @RequestBody JobPost jobPost,
             Authentication authentication) {
 
-        if (authentication == null) {
+        // -------------------------------------------------
+        // Validate authentication
+        // -------------------------------------------------
+
+        if (authentication == null ||
+                !authentication.isAuthenticated()) {
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Authentication required");
+                    .body("Please login first");
         }
 
-        if (jobPost.getPostId() <= 0) {
 
-            return ResponseEntity
-                    .badRequest()
-                    .body("Valid postId is required");
-        }
+        // -------------------------------------------------
+        // Logged-in username
+        // -------------------------------------------------
 
-        String username =
-                authentication.getName();
+        String username = authentication.getName();
 
-        User user =
-                userRepo.findByUsername(username);
+
+        // -------------------------------------------------
+        // Find logged-in user
+        // -------------------------------------------------
+
+        User user = userRepo.findByUsername(username);
 
         if (user == null) {
 
@@ -186,11 +193,49 @@ public class JobRestController {
         }
 
 
+        // -------------------------------------------------
+        // Find existing job
+        // -------------------------------------------------
+
+        JobPost existingJob;
+
+        try {
+
+            existingJob =
+                    service.getJob(jobPost.getPostId());
+
+        } catch (Exception e) {
+
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Job not found");
+        }
+
+
+        if (existingJob == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Job not found");
+        }
+
+
         // =================================================
-        // ADMIN CAN EDIT ANY JOB
+        // ADMIN
         // =================================================
 
-        if ("ADMIN".equals(user.getRole())) {
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+
+            /*
+             * ADMIN CAN EDIT ANY JOB.
+             *
+             * We preserve the original owner.
+             * Frontend cannot change postedBy.
+             */
+
+            jobPost.setPostedBy(
+                    existingJob.getPostedBy()
+            );
 
             service.updateJob(jobPost);
 
@@ -204,45 +249,40 @@ public class JobRestController {
         // RECRUITER
         // =================================================
 
-        if ("RECRUITER".equals(user.getRole())) {
+        if ("RECRUITER".equalsIgnoreCase(user.getRole())) {
 
-            if (!"APPROVED".equals(
+            // Recruiter must be approved
+
+            if (!"APPROVED".equalsIgnoreCase(
                     user.getRecruiterStatus())) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body(
-                                "Recruiter is not approved by Admin"
-                        );
+                        .body("Recruiter is not approved by Admin");
             }
 
 
-            JobPost existingJob =
-                    service.getJob(
-                            jobPost.getPostId()
-                    );
+            // -------------------------------------------------
+            // Ownership check
+            // -------------------------------------------------
 
-            if (existingJob == null) {
-
-                return ResponseEntity
-                        .status(HttpStatus.NOT_FOUND)
-                        .body("Job not found");
-            }
+            String owner =
+                    existingJob.getPostedBy();
 
 
-            // Recruiter can edit only own job
-            if (!username.equals(
-                    existingJob.getPostedBy())) {
+            if (owner == null ||
+                    !owner.equals(username)) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
                         .body(
-                                "You can edit only your own jobs"
+                                "You can edit only your own job posts"
                         );
             }
 
 
-            // Keep original owner
+            // Preserve owner
+
             jobPost.setPostedBy(username);
 
             service.updateJob(jobPost);
@@ -259,15 +299,16 @@ public class JobRestController {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(
-                        "Only recruiter or admin can edit jobs"
-                );
+                .body("Users are not allowed to edit jobs");
     }
 
 
     // =====================================================
     // DELETE JOB
-    // RECRUITER + ADMIN
+    //
+    // ADMIN     -> ANY JOB
+    // RECRUITER -> ONLY OWN JOB
+    // USER      -> NO ACCESS
     // =====================================================
 
     @DeleteMapping("/jobPost/{postId}")
@@ -275,18 +316,22 @@ public class JobRestController {
             @PathVariable int postId,
             Authentication authentication) {
 
-        if (authentication == null) {
+        if (authentication == null ||
+                !authentication.isAuthenticated()) {
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Authentication required");
+                    .body("Please login first");
         }
+
 
         String username =
                 authentication.getName();
 
+
         User user =
                 userRepo.findByUsername(username);
+
 
         if (user == null) {
 
@@ -296,10 +341,14 @@ public class JobRestController {
         }
 
 
-        JobPost job =
-                service.getJob(postId);
+        JobPost existingJob;
 
-        if (job == null) {
+        try {
+
+            existingJob =
+                    service.getJob(postId);
+
+        } catch (Exception e) {
 
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -307,8 +356,19 @@ public class JobRestController {
         }
 
 
+        if (existingJob == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Job not found");
+        }
+
+
+        // =================================================
         // ADMIN
-        if ("ADMIN".equals(user.getRole())) {
+        // =================================================
+
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
 
             service.deleteJob(postId);
 
@@ -318,29 +378,35 @@ public class JobRestController {
         }
 
 
+        // =================================================
         // RECRUITER
-        if ("RECRUITER".equals(user.getRole())) {
+        // =================================================
 
-            if (!"APPROVED".equals(
+        if ("RECRUITER".equalsIgnoreCase(user.getRole())) {
+
+            if (!"APPROVED".equalsIgnoreCase(
                     user.getRecruiterStatus())) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body(
-                                "Recruiter is not approved by Admin"
-                        );
+                        .body("Recruiter is not approved by Admin");
             }
 
 
-            if (!username.equals(
-                    job.getPostedBy())) {
+            String owner =
+                    existingJob.getPostedBy();
+
+
+            if (owner == null ||
+                    !owner.equals(username)) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
                         .body(
-                                "You can delete only your own jobs"
+                                "You can delete only your own job posts"
                         );
             }
+
 
             service.deleteJob(postId);
 
@@ -350,11 +416,13 @@ public class JobRestController {
         }
 
 
+        // =================================================
+        // USER
+        // =================================================
+
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(
-                        "Only recruiter or admin can delete jobs"
-                );
+                .body("Users are not allowed to delete jobs");
     }
 
 

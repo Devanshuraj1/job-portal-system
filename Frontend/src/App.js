@@ -1,109 +1,81 @@
-import "./App.css";
-
+import React from "react";
 import {
-  BrowserRouter,
-  Routes,
-  Route
+    BrowserRouter,
+    Routes,
+    Route
 } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import AllPosts from "./components/AllPosts";
-import Create from "./components/Create";
-import Edit from "./components/Edit";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import ProtectedRoute from "./components/ProtectedRoute";
-import AdminDashboard from "./components/AdminDashboard";
 import JobDetails from "./components/JobDetails";
-
+import Edit from "./components/Edit";
+import UserDashboard from "./components/UserDashboard";
+import AdminDashboard from "./components/AdminDashboard";
+import Create from "./components/Create";
 
 function App() {
 
-  return (
+    return (
+        <BrowserRouter>
 
-    <BrowserRouter>
+            <Navbar />
 
-      <Navbar />
+            <Routes>
 
-      <Routes>
+                {/* JOB LIST / HOME */}
+                <Route
+                    path="/"
+                    element={<AllPosts />}
+                />
 
-        {/* HOME */}
+                {/* LOGIN */}
+                <Route
+                    path="/login"
+                    element={<Login />}
+                />
 
-        <Route
-          path="/"
-          element={<AllPosts />}
-        />
+                {/* REGISTER */}
+                <Route
+                    path="/register"
+                    element={<Register />}
+                />
 
-        {/* LOGIN */}
+                {/* JOB DETAILS */}
+                <Route
+                    path="/job/:id"
+                    element={<JobDetails />}
+                />
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+                {/* CREATE JOB */}
+                <Route
+                    path="/create"
+                    element={<Create />}
+                />
 
-        {/* REGISTER */}
+                {/* EDIT JOB */}
+                <Route
+                    path="/edit"
+                    element={<Edit />}
+                />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+                {/* USER DASHBOARD */}
+                <Route
+                    path="/dashboard"
+                    element={<UserDashboard />}
+                />
 
-        {/* JOB DETAILS */}
+                {/* ADMIN DASHBOARD */}
+                <Route
+                    path="/admin"
+                    element={<AdminDashboard />}
+                />
 
-        <Route
-          path="/job/:id"
-          element={<JobDetails />}
-        />
+            </Routes>
 
-        {/* CREATE JOB */}
-
-        <Route
-          path="/create"
-          element={
-            <ProtectedRoute
-              allowedRoles={[
-                "RECRUITER",
-                "ADMIN"
-              ]}
-            >
-              <Create />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* EDIT JOB */}
-
-        <Route
-          path="/edit"
-          element={
-            <ProtectedRoute
-              allowedRoles={[
-                "RECRUITER",
-                "ADMIN"
-              ]}
-            >
-              <Edit />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* ADMIN DASHBOARD */}
-
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute
-              allowedRoles={["ADMIN"]}
-            >
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-      </Routes>
-
-    </BrowserRouter>
-  );
+        </BrowserRouter>
+    );
 }
 
 export default App;

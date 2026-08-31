@@ -1,0 +1,117 @@
+package com.dev.springbootrest.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dev.springbootrest.model.JobApplication;
+import com.dev.springbootrest.repo.JobApplicationRepo;
+import com.dev.springbootrest.repo.JobRepo;
+
+
+@Service
+public class JobApplicationService {
+
+    @Autowired
+    private JobApplicationRepo applicationRepo;
+
+    @Autowired
+    private JobRepo jobRepo;
+
+
+    // =====================================================
+    // APPLY FOR JOB
+    // =====================================================
+
+    public JobApplication applyForJob(
+            int jobId,
+            String username) {
+
+        // -------------------------------------------------
+        // 1. Check whether job exists
+        // -------------------------------------------------
+
+        if (!jobRepo.existsById(jobId)) {
+
+            throw new RuntimeException(
+                    "Job not found"
+            );
+        }
+
+
+        // -------------------------------------------------
+        // 2. Check duplicate application
+        // -------------------------------------------------
+
+        boolean alreadyApplied =
+                applicationRepo
+                        .existsByJobIdAndUsername(
+                                jobId,
+                                username
+                        );
+
+        if (alreadyApplied) {
+
+            throw new RuntimeException(
+                    "You have already applied for this job"
+            );
+        }
+
+
+        // -------------------------------------------------
+        // 3. Create application
+        // -------------------------------------------------
+
+        JobApplication application =
+                new JobApplication(
+                        jobId,
+                        username
+                );
+
+
+        // -------------------------------------------------
+        // 4. Save application
+        // -------------------------------------------------
+
+        return applicationRepo.save(
+                application
+        );
+    }
+
+
+    // =====================================================
+    // GET USER APPLICATIONS
+    // =====================================================
+
+    public List<JobApplication> getUserApplications(
+            String username) {
+
+        return applicationRepo.findByUsername(
+                username
+        );
+    }
+
+
+    // =====================================================
+    // GET JOB APPLICANTS
+    // =====================================================
+
+    public List<JobApplication> getJobApplicants(
+            int jobId) {
+
+        return applicationRepo.findByJobId(
+                jobId
+        );
+    }
+
+
+    // =====================================================
+    // GET ALL APPLICATIONS
+    // =====================================================
+
+    public List<JobApplication> getAllApplications() {
+
+        return applicationRepo.findAll();
+    }
+}

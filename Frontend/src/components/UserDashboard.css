@@ -1,0 +1,546 @@
+/* =====================================================
+   PAGE
+===================================================== */
+
+.dashboard-page {
+    min-height: 100vh;
+    background: #f7f8fa;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.dashboard-container {
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.dashboard-label {
+    margin: 0 0 8px;
+    color: #667085;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    color: #101828;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.dashboard-subtitle {
+    margin: 10px 0 0;
+    color: #667085;
+    font-size: 15px;
+}
+
+.browse-jobs-button {
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+    white-space: nowrap;
+}
+
+.browse-jobs-button:hover {
+    background: #1f2937;
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+.application-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid #eaecf0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.03);
+}
+
+.summary-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background: #f2f4f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.summary-card span {
+    display: block;
+    color: #667085;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.summary-card strong {
+    display: block;
+    color: #101828;
+    font-size: 24px;
+}
+
+
+/* =====================================================
+   APPLICATION SECTION
+===================================================== */
+
+.applications-section {
+    background: white;
+    border: 1px solid #eaecf0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.03);
+}
+
+.section-header {
+    padding: 22px 25px;
+    border-bottom: 1px solid #eaecf0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-header h2 {
+    margin: 0;
+    color: #101828;
+    font-size: 20px;
+}
+
+.section-header span {
+    color: #667085;
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   APPLICATION LIST
+===================================================== */
+
+.applications-list {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =====================================================
+   APPLICATION CARD
+===================================================== */
+
+.application-card {
+    display: grid;
+    grid-template-columns: 55px 1fr auto;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 25px;
+    border-bottom: 1px solid #f0f2f5;
+    transition: background 0.2s ease;
+}
+
+.application-card:last-child {
+    border-bottom: none;
+}
+
+.application-card:hover {
+    background: #fafafa;
+}
+
+
+/* =====================================================
+   JOB ICON
+===================================================== */
+
+.application-job-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 11px;
+    background: #111827;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   JOB DETAILS
+===================================================== */
+
+.application-details {
+    min-width: 0;
+}
+
+.application-details h3 {
+    margin: 0 0 5px;
+    color: #101828;
+    font-size: 17px;
+    font-weight: 650;
+}
+
+.application-details p {
+    margin: 0 0 10px;
+    color: #667085;
+    font-size: 14px;
+}
+
+.application-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.application-meta span {
+    color: #98a2b3;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.application-status {
+    min-width: 125px;
+    text-align: right;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+
+/* APPLIED */
+
+.status-applied {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.status-applied .status-dot {
+    background: #f97316;
+}
+
+
+/* SHORTLISTED */
+
+.status-shortlisted {
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.status-shortlisted .status-dot {
+    background: #12b76a;
+}
+
+
+/* REJECTED */
+
+.status-rejected {
+    background: #fef3f2;
+    color: #b42318;
+}
+
+.status-rejected .status-dot {
+    background: #f04438;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty-applications {
+    text-align: center;
+    padding: 70px 25px;
+}
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #f2f4f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.empty-applications h3 {
+    margin: 0 0 8px;
+    color: #101828;
+    font-size: 19px;
+}
+
+.empty-applications p {
+    max-width: 430px;
+    margin: 0 auto 22px;
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.empty-applications button {
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.dashboard-loading {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #667085;
+}
+
+.loading-spinner {
+    width: 35px;
+    height: 35px;
+    border: 3px solid #eaecf0;
+    border-top: 3px solid #111827;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.dashboard-error {
+    max-width: 500px;
+    margin: 80px auto;
+    padding: 40px;
+    background: white;
+    border: 1px solid #eaecf0;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.error-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    background: #fef3f2;
+    color: #d92d20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.dashboard-error h2 {
+    margin: 0 0 10px;
+    color: #101828;
+}
+
+.dashboard-error p {
+    margin: 0 0 22px;
+    color: #667085;
+    font-size: 14px;
+}
+
+.dashboard-error button {
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 11px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 900px) {
+
+    .application-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-header h1 {
+        font-size: 30px;
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 650px) {
+
+    .dashboard-page {
+        padding: 25px 14px;
+    }
+
+    .dashboard-header {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-bottom: 25px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 27px;
+    }
+
+    .browse-jobs-button {
+        width: 100%;
+    }
+
+    .application-summary {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .summary-card {
+        padding: 15px;
+        gap: 10px;
+    }
+
+    .summary-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+    }
+
+    .summary-card span {
+        font-size: 10px;
+    }
+
+    .summary-card strong {
+        font-size: 20px;
+    }
+
+    .section-header {
+        padding: 18px;
+    }
+
+    .application-card {
+        grid-template-columns: 45px 1fr;
+        gap: 13px;
+        padding: 18px;
+    }
+
+    .application-job-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 17px;
+    }
+
+    .application-details h3 {
+        font-size: 15px;
+    }
+
+    .application-details p {
+        font-size: 13px;
+    }
+
+    .application-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .application-status {
+        grid-column: 2;
+        min-width: 0;
+        text-align: left;
+    }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 400px) {
+
+    .application-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header h1 {
+        font-size: 24px;
+    }
+
+}
