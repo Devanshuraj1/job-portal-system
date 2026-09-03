@@ -5,10 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dev.springbootrest.model.ApplicationStatus;
 import com.dev.springbootrest.model.JobApplication;
+import com.dev.springbootrest.model.JobPost;
 import com.dev.springbootrest.repo.JobApplicationRepo;
 import com.dev.springbootrest.repo.JobRepo;
-
 
 @Service
 public class JobApplicationService {
@@ -108,10 +109,80 @@ public class JobApplicationService {
 
     // =====================================================
     // GET ALL APPLICATIONS
+    // ADMIN
     // =====================================================
 
     public List<JobApplication> getAllApplications() {
 
         return applicationRepo.findAll();
+    }
+
+
+    // =====================================================
+    // UPDATE APPLICATION STATUS
+    // RECRUITER
+    // =====================================================
+
+    public JobApplication updateApplicationStatus(
+            int applicationId,
+            ApplicationStatus newStatus,
+            String recruiterUsername) {
+
+
+        // -------------------------------------------------
+        // 1. Find application
+        // -------------------------------------------------
+
+        JobApplication application =
+                applicationRepo
+                        .findById(applicationId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Application not found"
+                                )
+                        );
+
+
+        // -------------------------------------------------
+        // 2. Find the job
+        // -------------------------------------------------
+
+        JobPost job =
+                jobRepo
+                        .findById(application.getJobId())
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Job not found"
+                                )
+                        );
+
+
+        // -------------------------------------------------
+        // 3. Check job ownership
+        // -------------------------------------------------
+
+        if (!job.getPostedBy()
+                .equals(recruiterUsername)) {
+
+            throw new RuntimeException(
+                    "You can only update applications for your own jobs"
+            );
+        }
+
+
+        // -------------------------------------------------
+        // 4. Update status
+        // -------------------------------------------------
+
+        application.setStatus(newStatus);
+
+
+        // -------------------------------------------------
+        // 5. Save updated application
+        // -------------------------------------------------
+
+        return applicationRepo.save(
+                application
+        );
     }
 }

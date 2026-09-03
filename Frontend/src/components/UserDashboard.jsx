@@ -70,7 +70,6 @@ function UserDashboard() {
             }
         };
 
-
         fetchApplications();
 
     }, []);
@@ -83,7 +82,7 @@ function UserDashboard() {
     const formatStatus = (status) => {
 
         if (!status) {
-            return "APPLIED";
+            return "Applied";
         }
 
         return status
@@ -108,6 +107,9 @@ function UserDashboard() {
 
             case "REJECTED":
                 return "status-rejected";
+
+            case "HIRED":
+                return "status-hired";
 
             case "APPLIED":
             default:
@@ -264,6 +266,9 @@ function UserDashboard() {
 
                 <div className="application-summary">
 
+
+                    {/* TOTAL */}
+
                     <div className="summary-card">
 
                         <div className="summary-icon">
@@ -284,6 +289,8 @@ function UserDashboard() {
 
                     </div>
 
+
+                    {/* APPLIED */}
 
                     <div className="summary-card">
 
@@ -315,6 +322,8 @@ function UserDashboard() {
                     </div>
 
 
+                    {/* SHORTLISTED */}
+
                     <div className="summary-card">
 
                         <div className="summary-icon">
@@ -343,6 +352,39 @@ function UserDashboard() {
 
                     </div>
 
+
+                    {/* HIRED */}
+
+                    <div className="summary-card">
+
+                        <div className="summary-icon">
+                            🎉
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Hired
+                            </span>
+
+                            <strong>
+
+                                {
+                                    applications.filter(
+                                        application =>
+                                            application.status ===
+                                                "HIRED"
+                                    ).length
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* REJECTED */}
 
                     <div className="summary-card">
 

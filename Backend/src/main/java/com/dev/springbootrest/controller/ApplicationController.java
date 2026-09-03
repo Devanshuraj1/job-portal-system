@@ -8,14 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.springbootrest.model.ApplicationStatus;
 import com.dev.springbootrest.model.JobApplication;
 import com.dev.springbootrest.service.JobApplicationService;
-
 
 @RestController
 @RequestMapping("/applications")
@@ -42,10 +44,8 @@ public class ApplicationController {
 
         try {
 
-            // Get username from JWT
             String username =
                     authentication.getName();
-
 
             JobApplication application =
                     applicationService.applyForJob(
@@ -53,11 +53,9 @@ public class ApplicationController {
                             username
                     );
 
-
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(application);
-
 
         } catch (RuntimeException e) {
 
@@ -79,7 +77,6 @@ public class ApplicationController {
 
         String username =
                 authentication.getName();
-
 
         return ResponseEntity.ok(
                 applicationService
@@ -118,5 +115,42 @@ public class ApplicationController {
                 applicationService
                         .getAllApplications()
         );
+    }
+
+
+    // =====================================================
+    // UPDATE APPLICATION STATUS
+    // RECRUITER
+    // =====================================================
+
+    @PatchMapping("/{applicationId}/status")
+    public ResponseEntity<?> updateApplicationStatus(
+            @PathVariable int applicationId,
+            @RequestBody ApplicationStatus newStatus,
+            Authentication authentication) {
+
+        try {
+
+            String recruiterUsername =
+                    authentication.getName();
+
+            JobApplication updatedApplication =
+                    applicationService
+                            .updateApplicationStatus(
+                                    applicationId,
+                                    newStatus,
+                                    recruiterUsername
+                            );
+
+            return ResponseEntity.ok(
+                    updatedApplication
+            );
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
     }
 }

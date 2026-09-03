@@ -70,15 +70,33 @@ const Navbar = () => {
 
 
           {/* =========================
-              LOGGED IN USER OPTIONS
+              LOGGED IN OPTIONS
           ========================= */}
 
           {token && (
 
             <>
 
-              {/* POST JOB
-                  RECRUITER + ADMIN */}
+              {/* =========================
+                  USER DASHBOARD
+              ========================= */}
+
+              {role === "USER" && (
+
+                <Link
+                  to="/dashboard"
+                  className="nav-link dashboard-nav-link"
+                >
+                  📋 My Applications
+                </Link>
+
+              )}
+
+
+              {/* =========================
+                  POST JOB
+                  RECRUITER + ADMIN
+              ========================= */}
 
               {(role === "RECRUITER" ||
                 role === "ADMIN") && (
@@ -93,7 +111,9 @@ const Navbar = () => {
               )}
 
 
-              {/* ADMIN DASHBOARD */}
+              {/* =========================
+                  ADMIN DASHBOARD
+              ========================= */}
 
               {role === "ADMIN" && (
 
