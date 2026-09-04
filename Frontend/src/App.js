@@ -13,6 +13,8 @@ import JobDetails from "./components/JobDetails";
 import Edit from "./components/Edit";
 import UserDashboard from "./components/UserDashboard";
 import AdminDashboard from "./components/AdminDashboard";
+import RecruiterDashboard from "./components/RecruiterDashboard";
+import Applicants from "./components/Applicants";
 import Create from "./components/Create";
 
 function App() {
@@ -24,49 +26,96 @@ function App() {
 
             <Routes>
 
-                {/* JOB LIST / HOME */}
+                {/* =========================
+                    HOME / JOB LIST
+                ========================= */}
+
                 <Route
                     path="/"
                     element={<AllPosts />}
                 />
 
-                {/* LOGIN */}
+
+                {/* =========================
+                    LOGIN
+                ========================= */}
+
                 <Route
                     path="/login"
                     element={<Login />}
                 />
 
-                {/* REGISTER */}
+
+                {/* =========================
+                    REGISTER
+                ========================= */}
+
                 <Route
                     path="/register"
                     element={<Register />}
                 />
 
-                {/* JOB DETAILS */}
+
+                {/* =========================
+                    JOB DETAILS
+                ========================= */}
+
                 <Route
                     path="/job/:id"
                     element={<JobDetails />}
                 />
 
-                {/* CREATE JOB */}
+
+                {/* =========================
+                    CREATE JOB
+                    RECRUITER + ADMIN
+                ========================= */}
+
                 <Route
                     path="/create"
                     element={<Create />}
                 />
 
-                {/* EDIT JOB */}
+
+                {/* =========================
+                    EDIT JOB
+                ========================= */}
+
                 <Route
                     path="/edit"
                     element={<Edit />}
                 />
 
-                {/* USER DASHBOARD */}
+
+                {/* =========================
+                    USER DASHBOARD
+                ========================= */}
+
                 <Route
                     path="/dashboard"
                     element={<UserDashboard />}
                 />
 
-                {/* ADMIN DASHBOARD */}
+
+                {/* =========================
+                    RECRUITER DASHBOARD
+                ========================= */}
+
+                <Route
+                    path="/recruiter-dashboard"
+                    element={<RecruiterDashboard />}
+                />
+
+                <Route
+                   path="/applications"
+                   element={<Applicants />}
+                />
+
+
+                {/* =========================
+                    ADMIN DASHBOARD
+                ========================= */}
+
                 <Route
                     path="/admin"
                     element={<AdminDashboard />}

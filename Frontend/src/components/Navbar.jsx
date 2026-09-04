@@ -59,7 +59,9 @@ const Navbar = () => {
         <div className="navbar-links">
 
 
-          {/* HOME */}
+          {/* =========================
+              HOME
+          ========================= */}
 
           <Link
             to="/"
@@ -94,6 +96,22 @@ const Navbar = () => {
 
 
               {/* =========================
+                  RECRUITER DASHBOARD
+              ========================= */}
+
+              {role === "RECRUITER" && (
+
+                <Link
+                  to="/recruiter-dashboard"
+                  className="nav-link dashboard-nav-link"
+                >
+                  💼 Recruiter Dashboard
+                </Link>
+
+              )}
+
+
+              {/* =========================
                   POST JOB
                   RECRUITER + ADMIN
               ========================= */}
@@ -121,7 +139,7 @@ const Navbar = () => {
                   to="/admin"
                   className="nav-link"
                 >
-                  Admin Dashboard
+                  🛡️ Admin Dashboard
                 </Link>
 
               )}
