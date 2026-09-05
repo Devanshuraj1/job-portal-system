@@ -119,6 +119,11 @@ public class SecurityConfig {
                         ).permitAll()
 
 
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/jobPosts/my"
+                        ).hasAuthority("RECRUITER")
+
                         // =================================================
                         // GET JOBS
                         // PUBLIC

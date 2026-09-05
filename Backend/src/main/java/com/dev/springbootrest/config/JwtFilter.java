@@ -73,7 +73,6 @@ public class JwtFilter extends OncePerRequestFilter {
         if ("GET".equalsIgnoreCase(method)) {
 
             if (path.equals("/jobPosts")
-                    || path.startsWith("/jobPosts/")
                     || path.startsWith("/jobPost/")) {
 
                 return true;

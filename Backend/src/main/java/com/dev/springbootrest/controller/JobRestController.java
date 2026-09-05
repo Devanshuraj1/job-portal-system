@@ -47,6 +47,92 @@ public class JobRestController {
 
 
     // =====================================================
+    // GET MY JOBS
+    // RECRUITER
+    // =====================================================
+
+    @GetMapping("/jobPosts/my")
+    public ResponseEntity<?> getMyJobs(
+            Authentication authentication) {
+
+        // -------------------------------------------------
+        // Check authentication
+        // -------------------------------------------------
+
+        if (authentication == null ||
+                !authentication.isAuthenticated()) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Please login first");
+        }
+
+
+        // -------------------------------------------------
+        // Get logged-in username
+        // -------------------------------------------------
+
+        String username =
+                authentication.getName();
+
+
+        // -------------------------------------------------
+        // Find user
+        // -------------------------------------------------
+
+        User user =
+                userRepo.findByUsername(username);
+
+
+        if (user == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("User not found");
+        }
+
+
+        // -------------------------------------------------
+        // Check role
+        // -------------------------------------------------
+
+        if (!"RECRUITER".equalsIgnoreCase(
+                user.getRole())) {
+
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(
+                            "Only recruiters can access their jobs"
+                    );
+        }
+
+
+        // -------------------------------------------------
+        // Check recruiter approval
+        // -------------------------------------------------
+
+        if (!"APPROVED".equalsIgnoreCase(
+                user.getRecruiterStatus())) {
+
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(
+                            "Recruiter is not approved by Admin"
+                    );
+        }
+
+
+        // -------------------------------------------------
+        // Return recruiter's jobs
+        // -------------------------------------------------
+
+        return ResponseEntity.ok(
+                service.getMyJobs(username)
+        );
+    }
+
+
+    // =====================================================
     // GET SINGLE JOB
     // PUBLIC
     // =====================================================
@@ -82,9 +168,11 @@ public class JobRestController {
             @RequestBody JobPost jobPost,
             Authentication authentication) {
 
-        String username = authentication.getName();
+        String username =
+                authentication.getName();
 
-        User user = userRepo.findByUsername(username);
+        User user =
+                userRepo.findByUsername(username);
 
         if (user == null) {
 
@@ -98,7 +186,8 @@ public class JobRestController {
         // ADMIN
         // -------------------------------------------------
 
-        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+        if ("ADMIN".equalsIgnoreCase(
+                user.getRole())) {
 
             jobPost.setPostedBy(username);
 
@@ -106,7 +195,11 @@ public class JobRestController {
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(service.getJob(jobPost.getPostId()));
+                    .body(
+                            service.getJob(
+                                    jobPost.getPostId()
+                            )
+                    );
         }
 
 
@@ -114,25 +207,34 @@ public class JobRestController {
         // RECRUITER
         // -------------------------------------------------
 
-        if ("RECRUITER".equalsIgnoreCase(user.getRole())) {
+        if ("RECRUITER".equalsIgnoreCase(
+                user.getRole())) {
 
             if (!"APPROVED".equalsIgnoreCase(
                     user.getRecruiterStatus())) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body("Recruiter is not approved by Admin");
+                        .body(
+                                "Recruiter is not approved by Admin"
+                        );
             }
 
 
-            // Always set owner from logged-in user
+            // Always set owner
+            // from logged-in user
+
             jobPost.setPostedBy(username);
 
             service.addJob(jobPost);
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(service.getJob(jobPost.getPostId()));
+                    .body(
+                            service.getJob(
+                                    jobPost.getPostId()
+                            )
+                    );
         }
 
 
@@ -142,7 +244,9 @@ public class JobRestController {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body("Only Admin or approved Recruiter can post jobs");
+                .body(
+                        "Only Admin or approved Recruiter can post jobs"
+                );
     }
 
 
@@ -168,7 +272,9 @@ public class JobRestController {
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Please login first");
+                    .body(
+                            "Please login first"
+                    );
         }
 
 
@@ -176,20 +282,24 @@ public class JobRestController {
         // Logged-in username
         // -------------------------------------------------
 
-        String username = authentication.getName();
+        String username =
+                authentication.getName();
 
 
         // -------------------------------------------------
         // Find logged-in user
         // -------------------------------------------------
 
-        User user = userRepo.findByUsername(username);
+        User user =
+                userRepo.findByUsername(username);
 
         if (user == null) {
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("User not found");
+                    .body(
+                            "User not found"
+                    );
         }
 
 
@@ -202,13 +312,17 @@ public class JobRestController {
         try {
 
             existingJob =
-                    service.getJob(jobPost.getPostId());
+                    service.getJob(
+                            jobPost.getPostId()
+                    );
 
         } catch (Exception e) {
 
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Job not found");
+                    .body(
+                            "Job not found"
+                    );
         }
 
 
@@ -216,7 +330,9 @@ public class JobRestController {
 
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Job not found");
+                    .body(
+                            "Job not found"
+                    );
         }
 
 
@@ -224,13 +340,13 @@ public class JobRestController {
         // ADMIN
         // =================================================
 
-        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+        if ("ADMIN".equalsIgnoreCase(
+                user.getRole())) {
 
             /*
              * ADMIN CAN EDIT ANY JOB.
              *
-             * We preserve the original owner.
-             * Frontend cannot change postedBy.
+             * Preserve original owner.
              */
 
             jobPost.setPostedBy(
@@ -240,7 +356,9 @@ public class JobRestController {
             service.updateJob(jobPost);
 
             return ResponseEntity.ok(
-                    service.getJob(jobPost.getPostId())
+                    service.getJob(
+                            jobPost.getPostId()
+                    )
             );
         }
 
@@ -249,7 +367,8 @@ public class JobRestController {
         // RECRUITER
         // =================================================
 
-        if ("RECRUITER".equalsIgnoreCase(user.getRole())) {
+        if ("RECRUITER".equalsIgnoreCase(
+                user.getRole())) {
 
             // Recruiter must be approved
 
@@ -258,7 +377,9 @@ public class JobRestController {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body("Recruiter is not approved by Admin");
+                        .body(
+                                "Recruiter is not approved by Admin"
+                        );
             }
 
 
@@ -288,7 +409,9 @@ public class JobRestController {
             service.updateJob(jobPost);
 
             return ResponseEntity.ok(
-                    service.getJob(jobPost.getPostId())
+                    service.getJob(
+                            jobPost.getPostId()
+                    )
             );
         }
 
@@ -299,7 +422,9 @@ public class JobRestController {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body("Users are not allowed to edit jobs");
+                .body(
+                        "Users are not allowed to edit jobs"
+                );
     }
 
 
@@ -321,7 +446,9 @@ public class JobRestController {
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Please login first");
+                    .body(
+                            "Please login first"
+                    );
         }
 
 
@@ -337,7 +464,9 @@ public class JobRestController {
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("User not found");
+                    .body(
+                            "User not found"
+                    );
         }
 
 
@@ -352,7 +481,9 @@ public class JobRestController {
 
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Job not found");
+                    .body(
+                            "Job not found"
+                    );
         }
 
 
@@ -360,7 +491,9 @@ public class JobRestController {
 
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Job not found");
+                    .body(
+                            "Job not found"
+                    );
         }
 
 
@@ -368,7 +501,8 @@ public class JobRestController {
         // ADMIN
         // =================================================
 
-        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+        if ("ADMIN".equalsIgnoreCase(
+                user.getRole())) {
 
             service.deleteJob(postId);
 
@@ -382,14 +516,17 @@ public class JobRestController {
         // RECRUITER
         // =================================================
 
-        if ("RECRUITER".equalsIgnoreCase(user.getRole())) {
+        if ("RECRUITER".equalsIgnoreCase(
+                user.getRole())) {
 
             if (!"APPROVED".equalsIgnoreCase(
                     user.getRecruiterStatus())) {
 
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body("Recruiter is not approved by Admin");
+                        .body(
+                                "Recruiter is not approved by Admin"
+                        );
             }
 
 
@@ -422,7 +559,9 @@ public class JobRestController {
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body("Users are not allowed to delete jobs");
+                .body(
+                        "Users are not allowed to delete jobs"
+                );
     }
 
 

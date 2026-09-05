@@ -66,10 +66,10 @@ function App() {
                 />
 
 
-                {/* =========================
+                {/*
                     CREATE JOB
                     RECRUITER + ADMIN
-                ========================= */}
+                */}
 
                 <Route
                     path="/create"

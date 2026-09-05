@@ -1,475 +1,395 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axiosConfig";
 import "./Applicants.css";
 
 const Applicants = () => {
+    const [jobs, setJobs] = useState([]);
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
 
-  const [jobs, setJobs] = useState([]);
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+    // =====================================================
+    // LOAD RECRUITER JOBS + APPLICATIONS
+    // =====================================================
 
-  const token = localStorage.getItem("token");
+    const loadApplications = async () => {
+        try {
+            setLoading(true);
+            setError("");
+            setMessage("");
 
-  // =====================================================
-  // AXIOS CONFIG
-  // =====================================================
+            // Get recruiter's own jobs
+            const jobsResponse = await api.get("/jobPosts/my");
 
-  const api = axios.create({
-    baseURL: "http://localhost:8084",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+            const myJobs = jobsResponse.data;
 
-  // =====================================================
-  // LOAD RECRUITER JOBS
-  // =====================================================
+            console.log("MY JOBS:", myJobs);
 
-  const loadApplications = async () => {
+            setJobs(myJobs);
 
-    try {
+            // No jobs
+            if (!myJobs || myJobs.length === 0) {
+                setApplications([]);
+                setLoading(false);
+                return;
+            }
 
-      setLoading(true);
-      setError("");
-      setMessage("");
+            // Get applications for every job
+            const applicationRequests = myJobs.map((job) =>
+                api.get(`/applications/job/${job.postId}`)
+            );
 
-      // Get recruiter's own jobs
-      const jobsResponse =
-        await api.get("/jobPosts/my");
+            const responses = await Promise.all(applicationRequests);
 
-      const myJobs = jobsResponse.data;
+            // Combine all applications
+            const allApplications = [];
 
-      setJobs(myJobs);
+            responses.forEach((response, index) => {
+                const job = myJobs[index];
 
-      // No jobs
-      if (myJobs.length === 0) {
-        setApplications([]);
-        setLoading(false);
-        return;
-      }
+                if (response.data && Array.isArray(response.data)) {
+                    response.data.forEach((application) => {
+                        allApplications.push({
+                            ...application,
+                            jobTitle: job.postProfile,
+                            companyName: job.companyName,
+                        });
+                    });
+                }
+            });
 
-      // =================================================
-      // GET APPLICANTS FOR EVERY JOB
-      // =================================================
+            console.log("ALL APPLICATIONS:", allApplications);
 
-      const applicationRequests =
-        myJobs.map(job =>
-          api.get(
-            `/applications/job/${job.postId}`
-          )
-        );
+            setApplications(allApplications);
+        } catch (err) {
+            console.error("Error loading applications:", err);
 
-      const responses =
-        await Promise.all(applicationRequests);
+            if (err.response?.status === 401) {
+                setError("Unauthorized. Please login again.");
+                return;
+            }
 
-      // =================================================
-      // COMBINE ALL APPLICATIONS
-      // =================================================
+            if (err.response?.status === 403) {
+                setError(
+                    "You don't have permission to view these applications."
+                );
+                return;
+            }
 
-      const allApplications = [];
-
-      responses.forEach((response, index) => {
-
-        const job = myJobs[index];
-
-        response.data.forEach(application => {
-
-          allApplications.push({
-            ...application,
-            jobTitle: job.postProfile,
-            companyName: job.companyName,
-          });
-
-        });
-
-      });
-
-      setApplications(allApplications);
-
-    } catch (err) {
-
-      console.error(
-        "Error loading applications:",
-        err
-      );
-
-      if (err.response) {
-
-        setError(
-          err.response.data ||
-          "Unable to load applications"
-        );
-
-      } else {
-
-        setError(
-          "Unable to connect to server"
-        );
-      }
-
-    } finally {
-
-      setLoading(false);
-    }
-  };
-
-
-  // =====================================================
-  // LOAD ON PAGE OPEN
-  // =====================================================
-
-  useEffect(() => {
-
-    loadApplications();
-
-  }, []);
-
-
-  // =====================================================
-  // UPDATE APPLICATION STATUS
-  // =====================================================
-
-  const updateStatus = async (
-    applicationId,
-    newStatus
-  ) => {
-
-    try {
-
-      setError("");
-      setMessage("");
-
-      await api.patch(
-        `/applications/${applicationId}/status`,
-        newStatus,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+            if (err.response) {
+                setError(
+                    err.response.data ||
+                    "Unable to load applications"
+                );
+            } else {
+                setError("Unable to connect to server");
+            }
+        } finally {
+            setLoading(false);
         }
-      );
+    };
 
-      // Success message
-      setMessage(
-        `Application status updated to ${newStatus}`
-      );
+    // =====================================================
+    // LOAD DATA WHEN PAGE OPENS
+    // =====================================================
 
-      // Refresh applications
-      await loadApplications();
+    useEffect(() => {
+        loadApplications();
+    }, []);
 
-    } catch (err) {
+    // =====================================================
+    // UPDATE APPLICATION STATUS
+    // =====================================================
 
-      console.error(
-        "Status update error:",
-        err
-      );
+    const updateStatus = async (applicationId, newStatus) => {
+        try {
+            setError("");
+            setMessage("");
 
-      if (err.response) {
+            await api.patch(
+                `/applications/${applicationId}/status`,
+                newStatus,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
-        setError(
-          err.response.data ||
-          "Unable to update application status"
+            setMessage(
+                `Application status updated to ${newStatus}`
+            );
+
+            await loadApplications();
+        } catch (err) {
+            console.error("Status update error:", err);
+
+            if (err.response?.status === 401) {
+                setError("Unauthorized. Please login again.");
+                return;
+            }
+
+            if (err.response?.status === 403) {
+                setError(
+                    "You don't have permission to update this application."
+                );
+                return;
+            }
+
+            if (err.response) {
+                setError(
+                    err.response.data ||
+                    "Unable to update application status"
+                );
+            } else {
+                setError("Unable to connect to server");
+            }
+        }
+    };
+
+    // =====================================================
+    // LOADING
+    // =====================================================
+
+    if (loading) {
+        return (
+            <div className="applicants-page">
+                <div className="applicants-loading">
+                    Loading applications...
+                </div>
+            </div>
         );
-
-      } else {
-
-        setError(
-          "Unable to connect to server"
-        );
-      }
     }
-  };
 
-
-  // =====================================================
-  // LOADING
-  // =====================================================
-
-  if (loading) {
+    // =====================================================
+    // UI
+    // =====================================================
 
     return (
-      <div className="applicants-page">
+        <div className="applicants-page">
 
-        <div className="applicants-loading">
-          Loading applications...
-        </div>
-
-      </div>
-    );
-  }
-
-
-  // =====================================================
-  // UI
-  // =====================================================
-
-  return (
-
-    <div className="applicants-page">
-
-      {/* HEADER */}
-
-      <div className="applicants-header">
-
-        <div>
-          <h1>Applications</h1>
-
-          <p>
-            Review and manage applications
-            submitted for your jobs.
-          </p>
-        </div>
-
-        <button
-          className="refresh-btn"
-          onClick={loadApplications}
-        >
-          ↻ Refresh
-        </button>
-
-      </div>
-
-
-      {/* SUCCESS */}
-
-      {message && (
-        <div className="success-message">
-          ✓ {message}
-        </div>
-      )}
-
-
-      {/* ERROR */}
-
-      {error && (
-        <div className="error-message">
-          ⚠ {error}
-        </div>
-      )}
-
-
-      {/* NO JOBS */}
-
-      {jobs.length === 0 ? (
-
-        <div className="empty-applications">
-
-          <div className="empty-applications-icon">
-            💼
-          </div>
-
-          <h2>No Jobs Posted</h2>
-
-          <p>
-            You haven't posted any jobs yet.
-          </p>
-
-        </div>
-
-      ) : applications.length === 0 ? (
-
-        /* NO APPLICATIONS */
-
-        <div className="empty-applications">
-
-          <div className="empty-applications-icon">
-            📄
-          </div>
-
-          <h2>No Applications Yet</h2>
-
-          <p>
-            No candidates have applied
-            to your job postings yet.
-          </p>
-
-        </div>
-
-      ) : (
-
-        /* APPLICATIONS */
-
-        <div className="applications-list">
-
-          {applications.map(application => (
-
-            <div
-              className="application-card"
-              key={application.id}
-            >
-
-              {/* TOP */}
-
-              <div className="application-top">
-
-                <div className="candidate-info">
-
-                  <div className="candidate-avatar">
-
-                    {application.username
-                      ? application.username
-                          .charAt(0)
-                          .toUpperCase()
-                      : "U"}
-
-                  </div>
-
-                  <div>
-
-                    <h2>
-                      {application.username}
-                    </h2>
+            {/* HEADER */}
+            <div className="applicants-header">
+                <div>
+                    <h1>Applications</h1>
 
                     <p>
-                      Applied for{" "}
-                      <strong>
-                        {application.jobTitle}
-                      </strong>
+                        Review and manage applications
+                        submitted for your jobs.
                     </p>
-
-                  </div>
-
                 </div>
 
-
-                {/* STATUS */}
-
-                <span
-                  className={`status-badge ${application.status
-                    ?.toLowerCase()}`}
+                <button
+                    className="refresh-btn"
+                    onClick={loadApplications}
                 >
-                  {application.status}
-                </span>
-
-              </div>
-
-
-              {/* DETAILS */}
-
-              <div className="application-details">
-
-                <div className="detail-item">
-
-                  <span className="detail-label">
-                    🏢 Company
-                  </span>
-
-                  <span>
-                    {application.companyName}
-                  </span>
-
-                </div>
-
-
-                <div className="detail-item">
-
-                  <span className="detail-label">
-                    📅 Applied On
-                  </span>
-
-                  <span>
-                    {application.appliedAt
-                      ? new Date(
-                          application.appliedAt
-                        ).toLocaleDateString()
-                      : "N/A"}
-                  </span>
-
-                </div>
-
-
-                <div className="detail-item">
-
-                  <span className="detail-label">
-                    🆔 Application ID
-                  </span>
-
-                  <span>
-                    #{application.id}
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              {/* ACTIONS */}
-
-              <div className="application-actions">
-
-                {/* SHORTLIST */}
-
-                {application.status !== "SHORTLISTED" &&
-                  application.status !== "REJECTED" &&
-                  application.status !== "HIRED" && (
-
-                  <button
-                    className="shortlist-btn"
-                    onClick={() =>
-                      updateStatus(
-                        application.id,
-                        "SHORTLISTED"
-                      )
-                    }
-                  >
-                    ✓ Accept
-                  </button>
-
-                )}
-
-
-                {/* REJECT */}
-
-                {application.status !== "REJECTED" &&
-                  application.status !== "HIRED" && (
-
-                  <button
-                    className="reject-btn"
-                    onClick={() =>
-                      updateStatus(
-                        application.id,
-                        "REJECTED"
-                      )
-                    }
-                  >
-                    ✕ Reject
-                  </button>
-
-                )}
-
-
-                {/* HIRE */}
-
-                {application.status === "SHORTLISTED" && (
-
-                  <button
-                    className="hire-btn"
-                    onClick={() =>
-                      updateStatus(
-                        application.id,
-                        "HIRED"
-                      )
-                    }
-                  >
-                    ★ Hire
-                  </button>
-
-                )}
-
-              </div>
-
+                    ↻ Refresh
+                </button>
             </div>
 
-          ))}
+            {/* SUCCESS MESSAGE */}
+            {message && (
+                <div className="success-message">
+                    ✓ {message}
+                </div>
+            )}
+
+            {/* ERROR MESSAGE */}
+            {error && (
+                <div className="error-message">
+                    ⚠ {error}
+                </div>
+            )}
+
+            {/* NO JOBS */}
+            {jobs.length === 0 ? (
+                <div className="empty-applications">
+                    <div className="empty-applications-icon">
+                        💼
+                    </div>
+
+                    <h2>No Jobs Posted</h2>
+
+                    <p>
+                        You haven't posted any jobs yet.
+                    </p>
+                </div>
+            ) : applications.length === 0 ? (
+
+                /* NO APPLICATIONS */
+
+                <div className="empty-applications">
+                    <div className="empty-applications-icon">
+                        📄
+                    </div>
+
+                    <h2>No Applications Yet</h2>
+
+                    <p>
+                        No candidates have applied
+                        to your job postings yet.
+                    </p>
+                </div>
+
+            ) : (
+
+                /* APPLICATIONS */
+
+                <div className="applications-list">
+
+                    {applications.map((application) => (
+                        <div
+                            className="application-card"
+                            key={application.id}
+                        >
+
+                            {/* TOP SECTION */}
+                            <div className="application-top">
+
+                                <div className="candidate-info">
+
+                                    <div className="candidate-avatar">
+                                        {application.username
+                                            ? application.username
+                                                .charAt(0)
+                                                .toUpperCase()
+                                            : "U"}
+                                    </div>
+
+                                    <div>
+                                        <h2>
+                                            {application.username}
+                                        </h2>
+
+                                        <p>
+                                            Applied for{" "}
+
+                                            <strong>
+                                                {application.jobTitle}
+                                            </strong>
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                {/* STATUS */}
+                                <span
+                                    className={`status-badge ${
+                                        application.status?.toLowerCase()
+                                    }`}
+                                >
+                                    {application.status}
+                                </span>
+
+                            </div>
+
+                            {/* DETAILS */}
+                            <div className="application-details">
+
+                                {/* COMPANY */}
+                                <div className="detail-item">
+                                    <span className="detail-label">
+                                        🏢 Company
+                                    </span>
+
+                                    <span>
+                                        {application.companyName}
+                                    </span>
+                                </div>
+
+                                {/* APPLIED DATE */}
+                                <div className="detail-item">
+                                    <span className="detail-label">
+                                        📅 Applied On
+                                    </span>
+
+                                    <span>
+                                        {application.appliedAt
+                                            ? new Date(
+                                                application.appliedAt
+                                            ).toLocaleDateString()
+                                            : "N/A"}
+                                    </span>
+                                </div>
+
+                                {/* APPLICATION ID */}
+                                <div className="detail-item">
+                                    <span className="detail-label">
+                                        🆔 Application ID
+                                    </span>
+
+                                    <span>
+                                        #{application.id}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            {/* ACTION BUTTONS */}
+                            <div className="application-actions">
+
+                                {/* SHORTLIST */}
+                                {application.status !== "SHORTLISTED" &&
+                                    application.status !== "REJECTED" &&
+                                    application.status !== "HIRED" && (
+
+                                        <button
+                                            className="shortlist-btn"
+                                            onClick={() =>
+                                                updateStatus(
+                                                    application.id,
+                                                    "SHORTLISTED"
+                                                )
+                                            }
+                                        >
+                                            ✓ Shortlist
+                                        </button>
+                                    )}
+
+                                {/* REJECT */}
+                                {application.status !== "REJECTED" &&
+                                    application.status !== "HIRED" && (
+
+                                        <button
+                                            className="reject-btn"
+                                            onClick={() =>
+                                                updateStatus(
+                                                    application.id,
+                                                    "REJECTED"
+                                                )
+                                            }
+                                        >
+                                            ✕ Reject
+                                        </button>
+                                    )}
+
+                                {/* HIRE */}
+                                {application.status === "SHORTLISTED" && (
+
+                                    <button
+                                        className="hire-btn"
+                                        onClick={() =>
+                                            updateStatus(
+                                                application.id,
+                                                "HIRED"
+                                            )
+                                        }
+                                    >
+                                        ★ Hire
+                                    </button>
+                                )}
+
+                            </div>
+
+                        </div>
+                    ))}
+
+                </div>
+            )}
 
         </div>
-
-      )}
-
-    </div>
-  );
+    );
 };
 
 export default Applicants;

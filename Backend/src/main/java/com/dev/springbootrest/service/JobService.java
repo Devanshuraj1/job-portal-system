@@ -39,6 +39,17 @@ public class JobService {
 
 
     // =====================================================
+    // GET MY JOBS
+    // RECRUITER
+    // =====================================================
+
+    public List<JobPost> getMyJobs(String username) {
+
+        return repo.findByPostedBy(username);
+    }
+
+
+    // =====================================================
     // ADD JOB
     // =====================================================
 
