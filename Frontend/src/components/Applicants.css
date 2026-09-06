@@ -609,3 +609,7 @@
       width: 100%;
   }
 }
+
+.match-score { font-size: 20px; }
+.resume-link { color: #2563eb; font-weight: 600; text-decoration: none; }
+.resume-link:hover { text-decoration: underline; }

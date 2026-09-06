@@ -20,6 +20,9 @@ public class JobApplicationService {
     @Autowired
     private JobRepo jobRepo;
 
+    @Autowired
+    private ResumeMatchingService resumeMatchingService;
+
 
     // =====================================================
     // APPLY FOR JOB
@@ -27,7 +30,7 @@ public class JobApplicationService {
 
     public JobApplication applyForJob(
             int jobId,
-            String username) {
+            String username, String resumeFile, String resumeText) {
 
         // -------------------------------------------------
         // 1. Check whether job exists
@@ -64,11 +67,11 @@ public class JobApplicationService {
         // 3. Create application
         // -------------------------------------------------
 
+        JobPost job = jobRepo.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        int matchPercentage = resumeMatchingService.calculate(job, resumeText);
+
         JobApplication application =
-                new JobApplication(
-                        jobId,
-                        username
-                );
+                new JobApplication(jobId, username, resumeFile, matchPercentage);
 
 
         // -------------------------------------------------

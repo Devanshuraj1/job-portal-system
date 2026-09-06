@@ -19,6 +19,9 @@ function JobDetails() {
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const [applyMessage, setApplyMessage] = useState("");
+  const [resumeFile, setResumeFile] = useState(null);
+  const [showResumePicker, setShowResumePicker] = useState(false);
+  const [matchPercentage, setMatchPercentage] = useState(null);
 
 
   // =========================
@@ -73,114 +76,25 @@ function JobDetails() {
   // =========================
 
   const handleApply = async () => {
-
-    try {
-
-      setApplying(true);
-      setApplyMessage("");
-
-      console.log(
-        "Applying for Job ID:",
-        job.postId
-      );
-
-
-      // =====================================================
-      // APPLY API
-      // =====================================================
-
-      const response = await api.post(
-        `/applications/apply/${job.postId}`
-      );
-
-
-      console.log(
-        "APPLICATION RESPONSE:",
-        response.data
-      );
-
-
-      setApplied(true);
-
-      setApplyMessage(
-        "Application submitted successfully!"
-      );
-
-
-    } catch (err) {
-
-      console.error(
-        "APPLICATION ERROR:",
-        err
-      );
-
-      console.error(
-        "STATUS:",
-        err.response?.status
-      );
-
-      console.error(
-        "RESPONSE:",
-        err.response?.data
-      );
-
-
-      // =====================================================
-      // NOT LOGGED IN
-      // =====================================================
-
-      if (err.response?.status === 401) {
-
-        setApplyMessage(
-          "Please login before applying for a job."
-        );
-
-      }
-
-      // =====================================================
-      // FORBIDDEN
-      // =====================================================
-
-      else if (err.response?.status === 403) {
-
-        setApplyMessage(
-          "You are not authorized to apply for this job."
-        );
-
-      }
-
-      // =====================================================
-      // DUPLICATE APPLICATION
-      // =====================================================
-
-      else if (err.response?.status === 409) {
-
-        setApplied(true);
-
-        setApplyMessage(
-          "You have already applied for this job."
-        );
-
-      }
-
-      // =====================================================
-      // OTHER ERROR
-      // =====================================================
-
-      else {
-
-        setApplyMessage(
-          err.response?.data ||
-          "Failed to submit application. Please try again."
-        );
-
-      }
-
-    } finally {
-
-      setApplying(false);
-
+    if (!resumeFile) {
+      setShowResumePicker(true);
+      setApplyMessage("Please select your resume (PDF or DOCX) before applying.");
+      return;
     }
+    try {
+      setApplying(true); setApplyMessage("");
+      const formData = new FormData();
+      formData.append("resume", resumeFile);
+      const response = await api.post(`/applications/apply/${job.postId}`, formData);
+      setApplied(true);
+      setMatchPercentage(response.data?.matchPercentage ?? null);
+      setApplyMessage("Application submitted successfully!");
+      setShowResumePicker(false);
+    } catch (err) {
+      if (err.response?.status === 401) setApplyMessage("Please login before applying for a job.");
+      else if (err.response?.status === 403) setApplyMessage("You are not authorized to apply for this job.");
+      else setApplyMessage(err.response?.data || "Failed to submit application. Please try again.");
+    } finally { setApplying(false); }
   };
 
 
@@ -603,6 +517,15 @@ function JobDetails() {
 
           <div className="job-details-actions">
 
+            {!applied && (
+              <input
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={(e) => { setResumeFile(e.target.files?.[0] || null); setApplyMessage(""); }}
+                className="resume-input"
+              />
+            )}
+
             <button
               className="apply-button"
               onClick={handleApply}
@@ -624,14 +547,16 @@ function JobDetails() {
               APPLY MESSAGE
           ========================= */}
 
+          {resumeFile && !applied && (
+            <div className="resume-selected">Resume: {resumeFile.name}</div>
+          )}
+
           {applyMessage && (
+            <div className="apply-message">{applyMessage}</div>
+          )}
 
-            <div className="apply-message">
-
-              {applyMessage}
-
-            </div>
-
+          {matchPercentage !== null && (
+            <div className="match-result">Your resume match: <strong>{matchPercentage}%</strong></div>
           )}
 
         </div>

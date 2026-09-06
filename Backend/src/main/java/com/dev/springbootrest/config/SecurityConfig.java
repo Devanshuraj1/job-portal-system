@@ -41,9 +41,9 @@ public class SecurityConfig {
     private JwtFilter jwtFilter;
 
 
-    // =====================================================
+
     // AUTHENTICATION PROVIDER
-    // =====================================================
+
 
     @Bean
     public AuthenticationProvider authProvider() {
@@ -63,9 +63,9 @@ public class SecurityConfig {
     }
 
 
-    // =====================================================
+
     // AUTHENTICATION MANAGER
-    // =====================================================
+
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -76,9 +76,8 @@ public class SecurityConfig {
     }
 
 
-    // =====================================================
+
     // SECURITY FILTER CHAIN
-    // =====================================================
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -87,31 +86,31 @@ public class SecurityConfig {
 
         http
 
-                // =================================================
+
                 // CSRF
-                // =================================================
+
 
                 .csrf(csrf -> csrf.disable())
 
 
-                // =================================================
+
                 // CORS
-                // =================================================
+
 
                 .cors(Customizer.withDefaults())
 
 
-                // =================================================
+
                 // AUTHORIZATION
-                // =================================================
+
 
                 .authorizeHttpRequests(auth -> auth
 
 
-                        // =================================================
+
                         // AUTH
                         // PUBLIC
-                        // =================================================
+
 
                         .requestMatchers(
                                 "/auth/register",
@@ -124,10 +123,10 @@ public class SecurityConfig {
                                 "/jobPosts/my"
                         ).hasAuthority("RECRUITER")
 
-                        // =================================================
+
                         // GET JOBS
                         // PUBLIC
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -138,10 +137,10 @@ public class SecurityConfig {
                         ).permitAll()
 
 
-                        // =================================================
+
                         // CREATE JOB
                         // AUTHENTICATED
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -149,10 +148,10 @@ public class SecurityConfig {
                         ).authenticated()
 
 
-                        // =================================================
+
                         // UPDATE JOB
                         // AUTHENTICATED
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.PUT,
@@ -161,10 +160,10 @@ public class SecurityConfig {
                         ).authenticated()
 
 
-                        // =================================================
+
                         // DELETE JOB
                         // AUTHENTICATED
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
@@ -173,10 +172,10 @@ public class SecurityConfig {
                         ).authenticated()
 
 
-                        // =================================================
+
                         // APPLY FOR JOB
                         // USER ONLY
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -184,10 +183,10 @@ public class SecurityConfig {
                         ).hasAuthority("USER")
 
 
-                        // =================================================
+
                         // MY APPLICATIONS
                         // USER ONLY
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -195,10 +194,10 @@ public class SecurityConfig {
                         ).hasAuthority("USER")
 
 
-                        // =================================================
+
                         // JOB APPLICANTS
                         // RECRUITER + ADMIN
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -209,38 +208,30 @@ public class SecurityConfig {
                         )
 
 
-                        // =================================================
+
                         // ALL APPLICATIONS
                         // ADMIN ONLY
-                        // =================================================
+
 
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/applications"
                         ).hasAuthority("ADMIN")
 
-
-                        // =================================================
                         // ADMIN APIs
-                        // =================================================
 
                         .requestMatchers(
                                 "/admin/**"
                         ).hasAuthority("ADMIN")
 
 
-                        // =================================================
                         // EVERYTHING ELSE
-                        // =================================================
 
                         .anyRequest().authenticated()
                 )
 
 
-                // =================================================
                 // STATELESS JWT SESSION
-                // =================================================
-
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -248,9 +239,7 @@ public class SecurityConfig {
                 )
 
 
-                // =================================================
                 // JWT FILTER
-                // =================================================
 
                 .addFilterBefore(
                         jwtFilter,
@@ -262,10 +251,7 @@ public class SecurityConfig {
     }
 
 
-    // =====================================================
     // CORS CONFIGURATION
-    // =====================================================
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 

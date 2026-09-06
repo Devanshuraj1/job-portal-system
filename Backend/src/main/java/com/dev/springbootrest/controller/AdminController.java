@@ -21,9 +21,9 @@ public class AdminController {
     private UserRepo userRepo;
 
 
-    // =========================
+
     // GET ALL PENDING RECRUITERS
-    // =========================
+
 
     @GetMapping("/recruiters/pending")
     public ResponseEntity<List<User>> getPendingRecruiters() {
@@ -38,9 +38,9 @@ public class AdminController {
     }
 
 
-    // =========================
+
     // APPROVE RECRUITER
-    // =========================
+
 
     @PutMapping("/recruiters/{id}/approve")
     public ResponseEntity<?> approveRecruiter(
@@ -76,9 +76,8 @@ public class AdminController {
     }
 
 
-    // =========================
+
     // REJECT RECRUITER
-    // =========================
 
     @PutMapping("/recruiters/{id}/reject")
     public ResponseEntity<?> rejectRecruiter(

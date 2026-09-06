@@ -16,6 +16,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import RecruiterDashboard from "./components/RecruiterDashboard";
 import Applicants from "./components/Applicants";
 import Create from "./components/Create";
+import MyJobs from "./components/MyJobs";
 
 function App() {
 
@@ -109,6 +110,11 @@ function App() {
                 <Route
                    path="/applications"
                    element={<Applicants />}
+                />
+
+                <Route
+                    path="/my-jobs"
+                    element={<MyJobs />}
                 />
 
 

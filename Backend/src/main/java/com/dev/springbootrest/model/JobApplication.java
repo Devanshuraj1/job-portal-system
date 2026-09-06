@@ -58,6 +58,12 @@ public class JobApplication {
     @Column(name = "status", nullable = false)
     private ApplicationStatus status;
 
+    @Column(name = "resume_file")
+    private String resumeFile;
+
+    @Column(name = "match_percentage")
+    private Integer matchPercentage;
+
 
     // =====================================================
     // CONSTRUCTOR
@@ -65,11 +71,13 @@ public class JobApplication {
 
     public JobApplication(
             int jobId,
-            String username) {
+            String username, String resumeFile, int matchPercentage) {
 
         this.jobId = jobId;
         this.username = username;
         this.appliedAt = LocalDateTime.now();
         this.status = ApplicationStatus.APPLIED;
+        this.resumeFile = resumeFile;
+        this.matchPercentage = matchPercentage;
     }
 }

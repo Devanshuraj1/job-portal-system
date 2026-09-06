@@ -298,6 +298,20 @@ const Applicants = () => {
                                     </span>
                                 </div>
 
+                                {/* MATCH SCORE */}
+                                <div className="detail-item match-score-item">
+                                    <span className="detail-label">🎯 Resume Match</span>
+                                    <strong className="match-score">{application.matchPercentage ?? 0}%</strong>
+                                </div>
+
+                                {/* RESUME */}
+                                <div className="detail-item">
+                                    <span className="detail-label">📄 Resume</span>
+                                    {application.resumeFile ? (
+                                        <a className="resume-link" href={`http://localhost:8084/applications/resume/${application.id}`} target="_blank" rel="noreferrer">View Resume</a>
+                                    ) : <span>Not uploaded</span>}
+                                </div>
+
                                 {/* APPLIED DATE */}
                                 <div className="detail-item">
                                     <span className="detail-label">
