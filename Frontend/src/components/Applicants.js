@@ -8,10 +8,7 @@ const Applicants = () => {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
-
-    // =====================================================
-    // LOAD RECRUITER JOBS + APPLICATIONS
-    // =====================================================
+    const [updatingId, setUpdatingId] = useState(null);
 
     const loadApplications = async () => {
         try {
@@ -19,36 +16,28 @@ const Applicants = () => {
             setError("");
             setMessage("");
 
-            // Get recruiter's own jobs
             const jobsResponse = await api.get("/jobPosts/my");
-
-            const myJobs = jobsResponse.data;
-
-            console.log("MY JOBS:", myJobs);
+            const myJobs = jobsResponse.data || [];
 
             setJobs(myJobs);
 
-            // No jobs
-            if (!myJobs || myJobs.length === 0) {
+            if (myJobs.length === 0) {
                 setApplications([]);
-                setLoading(false);
                 return;
             }
 
-            // Get applications for every job
             const applicationRequests = myJobs.map((job) =>
                 api.get(`/applications/job/${job.postId}`)
             );
 
             const responses = await Promise.all(applicationRequests);
 
-            // Combine all applications
             const allApplications = [];
 
             responses.forEach((response, index) => {
                 const job = myJobs[index];
 
-                if (response.data && Array.isArray(response.data)) {
+                if (Array.isArray(response.data)) {
                     response.data.forEach((application) => {
                         allApplications.push({
                             ...application,
@@ -59,44 +48,33 @@ const Applicants = () => {
                 }
             });
 
-            console.log("ALL APPLICATIONS:", allApplications);
-
             setApplications(allApplications);
+
         } catch (err) {
             console.error("Error loading applications:", err);
 
             if (err.response?.status === 401) {
                 setError("Unauthorized. Please login again.");
-                return;
-            }
-
-            if (err.response?.status === 403) {
+            } else if (err.response?.status === 403) {
                 setError(
                     "You don't have permission to view these applications."
                 );
-                return;
+            } else {
+                setError(
+                    err.response?.data ||
+                    "Unable to load applications."
+                );
             }
 
-            if (err.response) {
-                setError(
-                    err.response.data ||
-                    "Unable to load applications"
-                );
-            } else {
-                setError("Unable to connect to server");
-            }
         } finally {
             setLoading(false);
         }
     };
 
-    // =====================================================
-    // LOAD DATA WHEN PAGE OPENS
-    // =====================================================
-
     useEffect(() => {
         loadApplications();
     }, []);
+
 
     // =====================================================
     // UPDATE APPLICATION STATUS
@@ -104,12 +82,15 @@ const Applicants = () => {
 
     const updateStatus = async (applicationId, newStatus) => {
         try {
+            setUpdatingId(applicationId);
             setError("");
             setMessage("");
 
             await api.patch(
                 `/applications/${applicationId}/status`,
-                newStatus,
+                {
+                    status: newStatus
+                },
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -122,31 +103,221 @@ const Applicants = () => {
             );
 
             await loadApplications();
+
         } catch (err) {
             console.error("Status update error:", err);
 
             if (err.response?.status === 401) {
                 setError("Unauthorized. Please login again.");
-                return;
-            }
-
-            if (err.response?.status === 403) {
+            } else if (err.response?.status === 403) {
                 setError(
                     "You don't have permission to update this application."
                 );
+            } else {
+                setError(
+                    err.response?.data ||
+                    "Unable to update application status."
+                );
+            }
+
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+
+    // =====================================================
+    // VIEW / DOWNLOAD RESUME
+    // =====================================================
+
+    const viewResume = async (applicationId) => {
+        try {
+            setError("");
+
+            console.log(
+                "Opening resume for application:",
+                applicationId
+            );
+
+            const response = await api.get(
+                `/applications/resume/${applicationId}`,
+                {
+                    responseType: "blob",
+                }
+            );
+
+            console.log(
+                "Resume status:",
+                response.status
+            );
+
+            console.log(
+                "Resume content type:",
+                response.headers["content-type"]
+            );
+
+            const contentType =
+                response.headers["content-type"] ||
+                "application/octet-stream";
+
+            const blob = new Blob(
+                [response.data],
+                {
+                    type: contentType,
+                }
+            );
+
+            const fileURL =
+                window.URL.createObjectURL(blob);
+
+
+            // =================================================
+            // PDF
+            // =================================================
+
+            if (contentType.includes("pdf")) {
+
+                const newWindow =
+                    window.open(
+                        fileURL,
+                        "_blank"
+                    );
+
+                if (!newWindow) {
+                    setError(
+                        "Browser blocked the resume popup. Please allow popups."
+                    );
+                }
+
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(
+                        fileURL
+                    );
+                }, 60000);
+
                 return;
             }
 
-            if (err.response) {
-                setError(
-                    err.response.data ||
-                    "Unable to update application status"
+
+            // =================================================
+            // DOCX
+            // =================================================
+
+            if (
+                contentType.includes("word") ||
+                contentType.includes("officedocument")
+            ) {
+
+                const link =
+                    document.createElement("a");
+
+                link.href = fileURL;
+
+                link.download =
+                    `resume-${applicationId}.docx`;
+
+                document.body.appendChild(link);
+
+                link.click();
+
+                document.body.removeChild(link);
+
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(
+                        fileURL
+                    );
+                }, 5000);
+
+                setMessage(
+                    "DOCX resume downloaded successfully."
                 );
+
+                return;
+            }
+
+
+            // =================================================
+            // OTHER FILE
+            // =================================================
+
+            const link =
+                document.createElement("a");
+
+            link.href = fileURL;
+
+            link.download =
+                `resume-${applicationId}`;
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+            setTimeout(() => {
+                window.URL.revokeObjectURL(
+                    fileURL
+                );
+            }, 5000);
+
+        } catch (err) {
+
+            console.error(
+                "========== RESUME ERROR =========="
+            );
+
+            console.error(
+                "Error:",
+                err
+            );
+
+            console.error(
+                "Status:",
+                err.response?.status
+            );
+
+            console.error(
+                "Headers:",
+                err.response?.headers
+            );
+
+            console.error(
+                "Data:",
+                err.response?.data
+            );
+
+            console.error(
+                "=================================="
+            );
+
+
+            if (err.response?.status === 401) {
+
+                setError(
+                    "Unauthorized. Please login again."
+                );
+
+            } else if (err.response?.status === 403) {
+
+                setError(
+                    "You are not authorized to view this resume."
+                );
+
+            } else if (err.response?.status === 404) {
+
+                setError(
+                    "Resume file was not found on the server."
+                );
+
             } else {
-                setError("Unable to connect to server");
+
+                setError(
+                    "Unable to open resume."
+                );
             }
         }
     };
+
 
     // =====================================================
     // LOADING
@@ -156,11 +327,13 @@ const Applicants = () => {
         return (
             <div className="applicants-page">
                 <div className="applicants-loading">
-                    Loading applications...
+                    <div className="loading-spinner"></div>
+                    <p>Loading applications...</p>
                 </div>
             </div>
         );
     }
+
 
     // =====================================================
     // UI
@@ -169,13 +342,17 @@ const Applicants = () => {
     return (
         <div className="applicants-page">
 
-            {/* HEADER */}
             <div className="applicants-header">
+
                 <div>
+                    <span className="page-eyebrow">
+                        RECRUITER PORTAL
+                    </span>
+
                     <h1>Applications</h1>
 
                     <p>
-                        Review and manage applications
+                        Review candidates and manage applications
                         submitted for your jobs.
                     </p>
                 </div>
@@ -183,29 +360,39 @@ const Applicants = () => {
                 <button
                     className="refresh-btn"
                     onClick={loadApplications}
+                    disabled={loading}
                 >
-                    ↻ Refresh
+                    <span className="refresh-icon">↻</span>
+                    Refresh
                 </button>
+
             </div>
 
-            {/* SUCCESS MESSAGE */}
+
+            {/* MESSAGES */}
+
             {message && (
                 <div className="success-message">
-                    ✓ {message}
+                    <span>✓</span>
+                    {message}
                 </div>
             )}
 
-            {/* ERROR MESSAGE */}
             {error && (
                 <div className="error-message">
-                    ⚠ {error}
+                    <span>!</span>
+                    {error}
                 </div>
             )}
 
+
             {/* NO JOBS */}
+
             {jobs.length === 0 ? (
+
                 <div className="empty-applications">
-                    <div className="empty-applications-icon">
+
+                    <div className="empty-icon">
                         💼
                     </div>
 
@@ -214,190 +401,324 @@ const Applicants = () => {
                     <p>
                         You haven't posted any jobs yet.
                     </p>
+
                 </div>
+
             ) : applications.length === 0 ? (
 
-                /* NO APPLICATIONS */
-
                 <div className="empty-applications">
-                    <div className="empty-applications-icon">
+
+                    <div className="empty-icon">
                         📄
                     </div>
 
                     <h2>No Applications Yet</h2>
 
                     <p>
-                        No candidates have applied
-                        to your job postings yet.
+                        No candidates have applied to your
+                        job postings yet.
                     </p>
+
                 </div>
 
             ) : (
 
-                /* APPLICATIONS */
-
                 <div className="applications-list">
 
-                    {applications.map((application) => (
-                        <div
-                            className="application-card"
-                            key={application.id}
-                        >
+                    {applications.map((application) => {
 
-                            {/* TOP SECTION */}
-                            <div className="application-top">
+                        const status =
+                            application.status?.toLowerCase()
+                            || "applied";
 
-                                <div className="candidate-info">
+                        const isUpdating =
+                            updatingId === application.id;
 
-                                    <div className="candidate-avatar">
-                                        {application.username
-                                            ? application.username
-                                                .charAt(0)
-                                                .toUpperCase()
-                                            : "U"}
+                        return (
+
+                            <div
+                                className="application-card"
+                                key={application.id}
+                            >
+
+                                {/* HEADER */}
+
+                                <div className="application-top">
+
+                                    <div className="candidate-info">
+
+                                        <div className="candidate-avatar">
+
+                                            {application.username
+                                                ? application.username
+                                                    .charAt(0)
+                                                    .toUpperCase()
+                                                : "U"}
+
+                                        </div>
+
+                                        <div className="candidate-text">
+
+                                            <h2>
+                                                {application.username ||
+                                                    "Unknown Candidate"}
+                                            </h2>
+
+                                            <p>
+                                                Applied for{" "}
+                                                <strong>
+                                                    {application.jobTitle}
+                                                </strong>
+                                            </p>
+
+                                        </div>
+
                                     </div>
 
-                                    <div>
-                                        <h2>
-                                            {application.username}
-                                        </h2>
 
-                                        <p>
-                                            Applied for{" "}
-
-                                            <strong>
-                                                {application.jobTitle}
-                                            </strong>
-                                        </p>
-                                    </div>
-
-                                </div>
-
-                                {/* STATUS */}
-                                <span
-                                    className={`status-badge ${
-                                        application.status?.toLowerCase()
-                                    }`}
-                                >
-                                    {application.status}
-                                </span>
-
-                            </div>
-
-                            {/* DETAILS */}
-                            <div className="application-details">
-
-                                {/* COMPANY */}
-                                <div className="detail-item">
-                                    <span className="detail-label">
-                                        🏢 Company
-                                    </span>
-
-                                    <span>
-                                        {application.companyName}
-                                    </span>
-                                </div>
-
-                                {/* MATCH SCORE */}
-                                <div className="detail-item match-score-item">
-                                    <span className="detail-label">🎯 Resume Match</span>
-                                    <strong className="match-score">{application.matchPercentage ?? 0}%</strong>
-                                </div>
-
-                                {/* RESUME */}
-                                <div className="detail-item">
-                                    <span className="detail-label">📄 Resume</span>
-                                    {application.resumeFile ? (
-                                        <a className="resume-link" href={`http://localhost:8084/applications/resume/${application.id}`} target="_blank" rel="noreferrer">View Resume</a>
-                                    ) : <span>Not uploaded</span>}
-                                </div>
-
-                                {/* APPLIED DATE */}
-                                <div className="detail-item">
-                                    <span className="detail-label">
-                                        📅 Applied On
-                                    </span>
-
-                                    <span>
-                                        {application.appliedAt
-                                            ? new Date(
-                                                application.appliedAt
-                                            ).toLocaleDateString()
-                                            : "N/A"}
-                                    </span>
-                                </div>
-
-                                {/* APPLICATION ID */}
-                                <div className="detail-item">
-                                    <span className="detail-label">
-                                        🆔 Application ID
-                                    </span>
-
-                                    <span>
-                                        #{application.id}
-                                    </span>
-                                </div>
-
-                            </div>
-
-                            {/* ACTION BUTTONS */}
-                            <div className="application-actions">
-
-                                {/* SHORTLIST */}
-                                {application.status !== "SHORTLISTED" &&
-                                    application.status !== "REJECTED" &&
-                                    application.status !== "HIRED" && (
-
-                                        <button
-                                            className="shortlist-btn"
-                                            onClick={() =>
-                                                updateStatus(
-                                                    application.id,
-                                                    "SHORTLISTED"
-                                                )
-                                            }
-                                        >
-                                            ✓ Shortlist
-                                        </button>
-                                    )}
-
-                                {/* REJECT */}
-                                {application.status !== "REJECTED" &&
-                                    application.status !== "HIRED" && (
-
-                                        <button
-                                            className="reject-btn"
-                                            onClick={() =>
-                                                updateStatus(
-                                                    application.id,
-                                                    "REJECTED"
-                                                )
-                                            }
-                                        >
-                                            ✕ Reject
-                                        </button>
-                                    )}
-
-                                {/* HIRE */}
-                                {application.status === "SHORTLISTED" && (
-
-                                    <button
-                                        className="hire-btn"
-                                        onClick={() =>
-                                            updateStatus(
-                                                application.id,
-                                                "HIRED"
-                                            )
-                                        }
+                                    <span
+                                        className={`status-badge status-${status}`}
                                     >
-                                        ★ Hire
-                                    </button>
-                                )}
+                                        <span className="status-dot"></span>
+
+                                        {application.status ||
+                                            "APPLIED"}
+
+                                    </span>
+
+                                </div>
+
+
+                                {/* DETAILS */}
+
+                                <div className="application-details">
+
+                                    {/* COMPANY */}
+
+                                    <div className="detail-item">
+
+                                        <span className="detail-label">
+                                            <span className="detail-icon">
+                                                🏢
+                                            </span>
+                                            Company
+                                        </span>
+
+                                        <span className="detail-value">
+                                            {application.companyName ||
+                                                "N/A"}
+                                        </span>
+
+                                    </div>
+
+
+                                    {/* MATCH */}
+
+                                    <div className="detail-item match-item">
+
+                                        <span className="detail-label">
+                                            <span className="detail-icon">
+                                                🎯
+                                            </span>
+                                            Resume Match
+                                        </span>
+
+                                        <div className="match-wrapper">
+
+                                            <strong className="match-score">
+                                                {application.matchPercentage ??
+                                                    0}%
+                                            </strong>
+
+                                            <div className="match-bar">
+
+                                                <div
+                                                    className="match-bar-fill"
+                                                    style={{
+                                                        width: `${Math.min(
+                                                            application.matchPercentage ??
+                                                                0,
+                                                            100
+                                                        )}%`,
+                                                    }}
+                                                ></div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* RESUME */}
+
+                                    <div className="detail-item">
+
+                                        <span className="detail-label">
+
+                                            <span className="detail-icon">
+                                                📄
+                                            </span>
+
+                                            Resume
+
+                                        </span>
+
+                                        {application.resumeFile ? (
+
+                                            <button
+                                                type="button"
+                                                className="resume-link"
+                                                onClick={() =>
+                                                    viewResume(
+                                                        application.id
+                                                    )
+                                                }
+                                            >
+                                                View Resume
+                                                <span>↗</span>
+                                            </button>
+
+                                        ) : (
+
+                                            <span className="not-uploaded">
+                                                Not uploaded
+                                            </span>
+
+                                        )}
+
+                                    </div>
+
+
+                                    {/* DATE */}
+
+                                    <div className="detail-item">
+
+                                        <span className="detail-label">
+
+                                            <span className="detail-icon">
+                                                📅
+                                            </span>
+
+                                            Applied On
+
+                                        </span>
+
+                                        <span className="detail-value">
+
+                                            {application.appliedAt
+                                                ? new Date(
+                                                    application.appliedAt
+                                                ).toLocaleDateString()
+                                                : "N/A"}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    {/* ID */}
+
+                                    <div className="detail-item">
+
+                                        <span className="detail-label">
+
+                                            <span className="detail-icon">
+                                                #
+                                            </span>
+
+                                            Application ID
+
+                                        </span>
+
+                                        <span className="detail-value">
+                                            #{application.id}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* FOOTER */}
+
+                                <div className="application-footer">
+
+                                    <div className="footer-info">
+                                        Candidate application
+                                    </div>
+
+                                    <div className="application-actions">
+
+                                        {/* SHORTLIST */}
+
+                                        {application.status !== "SHORTLISTED" &&
+                                            application.status !== "REJECTED" &&
+                                            application.status !== "HIRED" && (
+
+                                                <button
+                                                    className="action-btn shortlist-btn"
+                                                    disabled={isUpdating}
+                                                    onClick={() =>
+                                                        updateStatus(
+                                                            application.id,
+                                                            "SHORTLISTED"
+                                                        )
+                                                    }
+                                                >
+                                                    <span>✓</span>
+                                                    Shortlist
+                                                </button>
+                                            )}
+
+
+                                        {/* REJECT */}
+
+                                        {application.status !== "REJECTED" &&
+                                            application.status !== "HIRED" && (
+
+                                                <button
+                                                    className="action-btn reject-btn"
+                                                    disabled={isUpdating}
+                                                    onClick={() =>
+                                                        updateStatus(
+                                                            application.id,
+                                                            "REJECTED"
+                                                        )
+                                                    }
+                                                >
+                                                    <span>×</span>
+                                                    Reject
+                                                </button>
+                                            )}
+
+
+                                        {/* HIRE */}
+
+                                        {application.status === "SHORTLISTED" && (
+
+                                            <button
+                                                className="action-btn hire-btn"
+                                                disabled={isUpdating}
+                                                onClick={() =>
+                                                    updateStatus(
+                                                        application.id,
+                                                        "HIRED"
+                                                    )
+                                                }
+                                            >
+                                                <span>★</span>
+                                                Hire
+                                            </button>
+                                        )}
+
+                                    </div>
+
+                                </div>
 
                             </div>
-
-                        </div>
-                    ))}
+                        );
+                    })}
 
                 </div>
             )}
