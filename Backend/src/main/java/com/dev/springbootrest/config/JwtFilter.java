@@ -45,20 +45,22 @@ public class JwtFilter extends OncePerRequestFilter {
         String method = request.getMethod();
 
 
-
+        // =========================
         // AUTH
-
+        // =========================
 
         if (path.equals("/auth/login")
-                || path.equals("/auth/register")) {
+                || path.equals("/auth/register")
+                || path.startsWith("/oauth2/")
+                || path.startsWith("/login/")) {
 
             return true;
         }
 
 
-
+        // =========================
         // PUBLIC LOAD
-
+        // =========================
 
         if (path.equals("/load")) {
 
@@ -66,8 +68,9 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
 
-
+        // =========================
         // PUBLIC GET JOBS
+        // =========================
 
         if ("GET".equalsIgnoreCase(method)) {
 
@@ -83,9 +86,9 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
 
-
+    // =====================================================
     // JWT FILTER
-
+    // =====================================================
 
     @Override
     protected void doFilterInternal(
@@ -117,8 +120,9 @@ public class JwtFilter extends OncePerRequestFilter {
         );
 
 
-
+        // =================================================
         // NO TOKEN
+        // =================================================
 
         if (authHeader == null
                 || !authHeader.startsWith("Bearer ")) {
@@ -136,9 +140,9 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
 
-
+        // =================================================
         // TOKEN PROCESSING
-
+        // =================================================
 
         try {
 
@@ -163,8 +167,9 @@ public class JwtFilter extends OncePerRequestFilter {
             );
 
 
-
+            // =================================================
             // USER AUTHENTICATION
+            // =================================================
 
             if (username != null
                     && SecurityContextHolder
@@ -192,9 +197,9 @@ public class JwtFilter extends OncePerRequestFilter {
                 );
 
 
-
+                // =================================================
                 // VALIDATE TOKEN
-
+                // =================================================
 
                 if (jwtService.validateToken(
                         token,
@@ -248,9 +253,9 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
 
-
+        // =================================================
         // CONTINUE REQUEST
-
+        // =================================================
 
         filterChain.doFilter(
                 request,

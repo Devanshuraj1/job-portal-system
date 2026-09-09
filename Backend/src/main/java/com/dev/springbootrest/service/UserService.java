@@ -1,6 +1,7 @@
 package com.dev.springbootrest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ public class UserService {
     private UserRepo repo;
 
     @Autowired
+    @Lazy
     private AuthenticationManager authManager;
 
     @Autowired
@@ -96,7 +98,7 @@ public class UserService {
 
 
     // =========================
-    // LOGIN
+    // NORMAL LOGIN
     // =========================
 
     public String verify(User user) {
@@ -167,6 +169,113 @@ public class UserService {
 
         // =========================
         // GENERATE JWT
+        // =========================
+
+        return jwtService.generateToken(
+                userDetails
+        );
+    }
+
+
+    // =====================================================
+    // GOOGLE LOGIN
+    // =====================================================
+
+    public String verifyGoogleUser(String email) {
+
+        // =========================
+        // CHECK EMAIL
+        // =========================
+
+        if (email == null || email.isBlank()) {
+
+            throw new RuntimeException(
+                    "Google account email not found"
+            );
+        }
+
+
+        // Normalize email
+        email = email.trim().toLowerCase();
+
+
+        // =========================
+        // FIND EXISTING USER
+        // =========================
+
+        User existingUser =
+                repo.findByUsername(email);
+
+
+        // =========================
+        // CREATE USER IF NOT EXISTS
+        // =========================
+
+        if (existingUser == null) {
+
+            User newUser = new User();
+
+            newUser.setUsername(email);
+
+            // Random password because Google
+            // authentication doesn't use our password
+            newUser.setPassword(
+                    encoder.encode(
+                            java.util.UUID.randomUUID().toString()
+                    )
+            );
+
+            newUser.setRole("USER");
+
+            newUser.setRecruiterStatus(
+                    "NOT_APPLICABLE"
+            );
+
+            existingUser = repo.save(newUser);
+        }
+
+
+        // =========================
+        // RECRUITER STATUS CHECK
+        // =========================
+
+        if ("RECRUITER".equalsIgnoreCase(
+                existingUser.getRole())) {
+
+
+            // PENDING
+            if ("PENDING".equalsIgnoreCase(
+                    existingUser.getRecruiterStatus())) {
+
+                throw new RuntimeException(
+                        "Recruiter account is pending admin approval"
+                );
+            }
+
+
+            // REJECTED
+            if ("REJECTED".equalsIgnoreCase(
+                    existingUser.getRecruiterStatus())) {
+
+                throw new RuntimeException(
+                        "Recruiter account has been rejected"
+                );
+            }
+        }
+
+
+        // =========================
+        // CREATE USER DETAILS
+        // =========================
+
+        UserDetails userDetails =
+                new com.dev.springbootrest.model.UserPrincipal(
+                        existingUser
+                );
+
+
+        // =========================
+        // GENERATE OUR EXISTING JWT
         // =========================
 
         return jwtService.generateToken(

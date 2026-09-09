@@ -325,6 +325,24 @@ function Login() {
 
           </form>
 
+          {/* GOOGLE LOGIN */}
+
+          <div className="google-login-divider">
+            <span>OR</span>
+          </div>
+
+          <button
+            type="button"
+            className="google-login-button"
+            onClick={() => {
+              window.location.href =
+                "http://localhost:8084/oauth2/authorization/google";
+            }}
+          >
+            <span className="google-icon">G</span>
+            Continue with Google
+          </button>
+
 
           {/* REGISTER */}
 

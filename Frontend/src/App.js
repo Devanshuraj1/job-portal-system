@@ -17,6 +17,7 @@ import RecruiterDashboard from "./components/RecruiterDashboard";
 import Applicants from "./components/Applicants";
 import Create from "./components/Create";
 import MyJobs from "./components/MyJobs";
+import OAuth2Success from "./components/OAuth2Success";
 
 function App() {
 
@@ -54,6 +55,13 @@ function App() {
                 <Route
                     path="/register"
                     element={<Register />}
+                />
+
+                {/* GOOGLE OAUTH SUCCESS*/}
+
+                <Route
+                      path="/oauth2/success"
+                      element={<OAuth2Success />}
                 />
 
 
@@ -98,9 +106,9 @@ function App() {
                 />
 
 
-                {/* =========================
-                    RECRUITER DASHBOARD
-                ========================= */}
+                
+                    {/* RECRUITER DASHBOARD */}
+                
 
                 <Route
                     path="/recruiter-dashboard"
@@ -118,9 +126,9 @@ function App() {
                 />
 
 
-                {/* =========================
+                {/* 
                     ADMIN DASHBOARD
-                ========================= */}
+                */}
 
                 <Route
                     path="/admin"

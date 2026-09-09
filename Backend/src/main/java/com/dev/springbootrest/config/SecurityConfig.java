@@ -40,10 +40,13 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
 
 
+    // =====================================================
     // AUTHENTICATION PROVIDER
-
+    // =====================================================
 
     @Bean
     public AuthenticationProvider authProvider() {
@@ -63,9 +66,9 @@ public class SecurityConfig {
     }
 
 
-
+    // =====================================================
     // AUTHENTICATION MANAGER
-
+    // =====================================================
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -76,8 +79,9 @@ public class SecurityConfig {
     }
 
 
-
+    // =====================================================
     // SECURITY FILTER CHAIN
+    // =====================================================
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -86,35 +90,37 @@ public class SecurityConfig {
 
         http
 
-
+                // =================================================
                 // CSRF
-
+                // =================================================
 
                 .csrf(csrf -> csrf.disable())
 
 
-
+                // =================================================
                 // CORS
-
+                // =================================================
 
                 .cors(Customizer.withDefaults())
 
 
-
+                // =================================================
                 // AUTHORIZATION
-
+                // =================================================
 
                 .authorizeHttpRequests(auth -> auth
 
 
-
+                        // =================================================
                         // AUTH
                         // PUBLIC
-
+                        // =================================================
 
                         .requestMatchers(
                                 "/auth/register",
-                                "/auth/login"
+                                "/auth/login",
+                                "/oauth2/**",
+                                "/login/**"
                         ).permitAll()
 
 
@@ -123,10 +129,10 @@ public class SecurityConfig {
                                 "/jobPosts/my"
                         ).hasAuthority("RECRUITER")
 
-
+                        // =================================================
                         // GET JOBS
                         // PUBLIC
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -137,10 +143,10 @@ public class SecurityConfig {
                         ).permitAll()
 
 
-
+                        // =================================================
                         // CREATE JOB
                         // AUTHENTICATED
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -148,10 +154,10 @@ public class SecurityConfig {
                         ).authenticated()
 
 
-
+                        // =================================================
                         // UPDATE JOB
                         // AUTHENTICATED
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.PUT,
@@ -160,10 +166,10 @@ public class SecurityConfig {
                         ).authenticated()
 
 
-
+                        // =================================================
                         // DELETE JOB
                         // AUTHENTICATED
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
@@ -172,10 +178,10 @@ public class SecurityConfig {
                         ).authenticated()
 
 
-
+                        // =================================================
                         // APPLY FOR JOB
                         // USER ONLY
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -183,10 +189,10 @@ public class SecurityConfig {
                         ).hasAuthority("USER")
 
 
-
+                        // =================================================
                         // MY APPLICATIONS
                         // USER ONLY
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -194,10 +200,10 @@ public class SecurityConfig {
                         ).hasAuthority("USER")
 
 
-
+                        // =================================================
                         // JOB APPLICANTS
                         // RECRUITER + ADMIN
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -208,38 +214,58 @@ public class SecurityConfig {
                         )
 
 
-
+                        // =================================================
                         // ALL APPLICATIONS
                         // ADMIN ONLY
-
+                        // =================================================
 
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/applications"
                         ).hasAuthority("ADMIN")
 
+
+                        // =================================================
                         // ADMIN APIs
+                        // =================================================
 
                         .requestMatchers(
                                 "/admin/**"
                         ).hasAuthority("ADMIN")
 
 
+                        // =================================================
                         // EVERYTHING ELSE
+                        // =================================================
 
                         .anyRequest().authenticated()
                 )
 
 
+                // =================================================
                 // STATELESS JWT SESSION
+                // =================================================
+
+                // OAuth2 login needs a short-lived session during the Google
+                // authorization handshake. JWT-protected API calls remain token based.
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
+                                SessionCreationPolicy.IF_REQUIRED
                         )
                 )
 
+                // =================================================
+                // GOOGLE OAUTH2 LOGIN
+                // =================================================
 
+                .oauth2Login(oauth -> oauth
+                        .successHandler(oauth2LoginSuccessHandler)
+                )
+
+
+                // =================================================
                 // JWT FILTER
+                // =================================================
 
                 .addFilterBefore(
                         jwtFilter,
@@ -251,7 +277,10 @@ public class SecurityConfig {
     }
 
 
+    // =====================================================
     // CORS CONFIGURATION
+    // =====================================================
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
