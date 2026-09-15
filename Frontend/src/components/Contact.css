@@ -1,0 +1,127 @@
+.contact-page {
+    min-height: calc(100vh - 80px);
+    background: #f5f7fb;
+    padding: 60px 20px;
+    box-sizing: border-box;
+}
+
+.contact-container {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 45px;
+    border-radius: 18px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+}
+
+.contact-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.contact-header h1 {
+    margin: 0 0 12px;
+    font-size: 34px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.contact-header p {
+    margin: 0 auto;
+    max-width: 650px;
+    color: #6b7280;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-form label {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 15px;
+    font-family: inherit;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus {
+    border-color: #4ec6c2;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.contact-form button {
+    margin-top: 20px;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 9px;
+    background: #59dad6;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.contact-form button:hover {
+    background: #54b6ca;
+    transform: translateY(-1px);
+}
+
+.contact-form button:active {
+    transform: translateY(0);
+}
+
+.contact-status {
+    margin: 15px 0 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #70cece;
+}
+
+@media (max-width: 600px) {
+    .contact-page {
+        padding: 30px 15px;
+    }
+
+    .contact-container {
+        padding: 28px 20px;
+        border-radius: 14px;
+    }
+
+    .contact-header h1 {
+        font-size: 28px;
+    }
+
+    .contact-header p {
+        font-size: 14px;
+    }
+}

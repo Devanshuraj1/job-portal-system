@@ -18,6 +18,7 @@ import Applicants from "./components/Applicants";
 import Create from "./components/Create";
 import MyJobs from "./components/MyJobs";
 import OAuth2Success from "./components/OAuth2Success";
+import Contact from "./components/Contact";
 
 function App() {
 
@@ -28,9 +29,9 @@ function App() {
 
             <Routes>
 
-                {/* =========================
+                {/* 
                     HOME / JOB LIST
-                ========================= */}
+                 */}
 
                 <Route
                     path="/"
@@ -38,9 +39,9 @@ function App() {
                 />
 
 
-                {/* =========================
+                {/* 
                     LOGIN
-                ========================= */}
+                */}
 
                 <Route
                     path="/login"
@@ -48,9 +49,9 @@ function App() {
                 />
 
 
-                {/* =========================
+                {/* 
                     REGISTER
-                ========================= */}
+                */}
 
                 <Route
                     path="/register"
@@ -65,9 +66,7 @@ function App() {
                 />
 
 
-                {/* =========================
-                    JOB DETAILS
-                ========================= */}
+                {/* JOB DETAILS */}
 
                 <Route
                     path="/job/:id"
@@ -86,9 +85,9 @@ function App() {
                 />
 
 
-                {/* =========================
+                {/*
                     EDIT JOB
-                ========================= */}
+                 */}
 
                 <Route
                     path="/edit"
@@ -96,9 +95,9 @@ function App() {
                 />
 
 
-                {/* =========================
+                {/*
                     USER DASHBOARD
-                ========================= */}
+                */}
 
                 <Route
                     path="/dashboard"
@@ -124,6 +123,10 @@ function App() {
                     path="/my-jobs"
                     element={<MyJobs />}
                 />
+                <Route
+                     path="/contact"
+                     element={<Contact />}
+                />
 
 
                 {/* 
@@ -134,6 +137,7 @@ function App() {
                     path="/admin"
                     element={<AdminDashboard />}
                 />
+                
 
             </Routes>
 

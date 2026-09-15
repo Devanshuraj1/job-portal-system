@@ -53,9 +53,9 @@ public class ApplicationController {
     private ResumeService resumeService;
 
 
-    // =========================================================
+
     // APPLY FOR JOB
-    // =========================================================
+
 
     @PostMapping(
             value = "/apply/{jobId}",
@@ -109,9 +109,8 @@ public class ApplicationController {
     }
 
 
-    // =========================================================
+
     // GET MY APPLICATIONS
-    // =========================================================
 
     @GetMapping("/my")
     public ResponseEntity<?> getMyApplications(
@@ -142,9 +141,9 @@ public class ApplicationController {
     }
 
 
-    // =========================================================
+
     // GET APPLICATIONS FOR ONE JOB
-    // =========================================================
+
 
     @GetMapping("/job/{jobId}")
     public ResponseEntity<?> getApplicationsByJob(
@@ -167,9 +166,9 @@ public class ApplicationController {
     }
 
 
-    // =========================================================
+
     // GET ALL APPLICATIONS
-    // =========================================================
+
 
     @GetMapping
     public ResponseEntity<?> getAllApplications() {
@@ -191,9 +190,9 @@ public class ApplicationController {
     }
 
 
-    // =========================================================
+
     // UPDATE APPLICATION STATUS
-    // =========================================================
+
 
     @PatchMapping("/{applicationId}/status")
     public ResponseEntity<?> updateStatus(
@@ -265,9 +264,7 @@ public class ApplicationController {
     }
 
 
-    // =========================================================
     // VIEW / DOWNLOAD RESUME
-    // =========================================================
 
     @GetMapping("/resume/{applicationId}")
     public ResponseEntity<?> getResume(
@@ -276,9 +273,7 @@ public class ApplicationController {
 
         try {
 
-            // -------------------------------------------------
             // Authentication check
-            // -------------------------------------------------
 
             if (authentication == null) {
 
@@ -288,10 +283,7 @@ public class ApplicationController {
             }
 
 
-            // -------------------------------------------------
             // Find application
-            // -------------------------------------------------
-
             JobApplication application =
                     applicationRepo.findById(applicationId)
                             .orElseThrow(
@@ -301,9 +293,7 @@ public class ApplicationController {
                             );
 
 
-            // -------------------------------------------------
             // Find related job
-            // -------------------------------------------------
 
             JobPost job =
                     jobRepo.findById(
@@ -315,17 +305,13 @@ public class ApplicationController {
                     );
 
 
-            // -------------------------------------------------
             // Logged-in user
-            // -------------------------------------------------
 
             String loggedInUser =
                     authentication.getName();
 
 
-            // -------------------------------------------------
             // Check applicant
-            // -------------------------------------------------
 
             boolean isApplicant =
                     loggedInUser.equals(
@@ -333,9 +319,7 @@ public class ApplicationController {
                     );
 
 
-            // -------------------------------------------------
             // Check recruiter
-            // -------------------------------------------------
 
             boolean isRecruiter =
                     loggedInUser.equals(
@@ -343,9 +327,9 @@ public class ApplicationController {
                     );
 
 
-            // -------------------------------------------------
+
             // Authorization
-            // -------------------------------------------------
+
 
             if (!isApplicant && !isRecruiter) {
 
@@ -357,9 +341,9 @@ public class ApplicationController {
             }
 
 
-            // -------------------------------------------------
+
             // Get filename stored in database
-            // -------------------------------------------------
+
 
             String resumeFile =
                     application.getResumeFile();
@@ -376,9 +360,9 @@ public class ApplicationController {
             }
 
 
-            // -------------------------------------------------
+
             // Get physical file path
-            // -------------------------------------------------
+
 
             Path path =
                     resumeService.getResumePath(
@@ -386,9 +370,9 @@ public class ApplicationController {
                     );
 
 
-            // -------------------------------------------------
+
             // Debug information
-            // -------------------------------------------------
+
 
             System.out.println(
                     "======================================"
@@ -425,9 +409,9 @@ public class ApplicationController {
             );
 
 
-            // -------------------------------------------------
+
             // Check file exists
-            // -------------------------------------------------
+
 
             if (!Files.exists(path)) {
 
@@ -440,9 +424,9 @@ public class ApplicationController {
             }
 
 
-            // -------------------------------------------------
+
             // Create resource
-            // -------------------------------------------------
+
 
             FileSystemResource resource =
                     new FileSystemResource(path);
@@ -456,9 +440,9 @@ public class ApplicationController {
                     fileName.toLowerCase();
 
 
-            // =================================================
+
             // PDF
-            // =================================================
+
 
             if (lowerName.endsWith(".pdf")) {
 
@@ -477,9 +461,9 @@ public class ApplicationController {
             }
 
 
-            // =================================================
+
             // DOCX
-            // =================================================
+
 
             if (lowerName.endsWith(".docx")) {
 
@@ -501,9 +485,8 @@ public class ApplicationController {
             }
 
 
-            // -------------------------------------------------
+
             // Unsupported file
-            // -------------------------------------------------
 
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -525,9 +508,8 @@ public class ApplicationController {
     }
 
 
-    // =========================================================
+
     // STATUS REQUEST DTO
-    // =========================================================
 
     public static class StatusRequest {
 

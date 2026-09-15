@@ -34,10 +34,8 @@ public class JobRestController {
     private UserRepo userRepo;
 
 
-    // =====================================================
     // GET ALL JOBS
     // PUBLIC
-    // =====================================================
 
     @GetMapping("/jobPosts")
     public List<JobPost> getAllJobs() {
@@ -46,18 +44,16 @@ public class JobRestController {
     }
 
 
-    // =====================================================
     // GET MY JOBS
     // RECRUITER
-    // =====================================================
 
     @GetMapping("/jobPosts/my")
     public ResponseEntity<?> getMyJobs(
             Authentication authentication) {
 
-        // -------------------------------------------------
+
         // Check authentication
-        // -------------------------------------------------
+
 
         if (authentication == null ||
                 !authentication.isAuthenticated()) {
@@ -68,17 +64,14 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
         // Get logged-in username
-        // -------------------------------------------------
 
         String username =
                 authentication.getName();
 
 
-        // -------------------------------------------------
+
         // Find user
-        // -------------------------------------------------
 
         User user =
                 userRepo.findByUsername(username);
@@ -92,9 +85,7 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
         // Check role
-        // -------------------------------------------------
 
         if (!"RECRUITER".equalsIgnoreCase(
                 user.getRole())) {
@@ -107,9 +98,8 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
+
         // Check recruiter approval
-        // -------------------------------------------------
 
         if (!"APPROVED".equalsIgnoreCase(
                 user.getRecruiterStatus())) {
@@ -122,9 +112,7 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
         // Return recruiter's jobs
-        // -------------------------------------------------
 
         return ResponseEntity.ok(
                 service.getMyJobs(username)
@@ -132,10 +120,8 @@ public class JobRestController {
     }
 
 
-    // =====================================================
     // GET SINGLE JOB
     // PUBLIC
-    // =====================================================
 
     @GetMapping("/jobPost/{postId}")
     public JobPost getJob(
@@ -145,10 +131,8 @@ public class JobRestController {
     }
 
 
-    // =====================================================
     // SEARCH JOB
     // PUBLIC
-    // =====================================================
 
     @GetMapping("/jobPosts/keyword/{keyword}")
     public List<JobPost> searchByKeyword(
@@ -158,10 +142,8 @@ public class JobRestController {
     }
 
 
-    // =====================================================
     // ADD JOB
     // ADMIN + APPROVED RECRUITER
-    // =====================================================
 
     @PostMapping("/jobPost")
     public ResponseEntity<?> addJob(
@@ -182,9 +164,7 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
         // ADMIN
-        // -------------------------------------------------
 
         if ("ADMIN".equalsIgnoreCase(
                 user.getRole())) {
@@ -203,9 +183,7 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
         // RECRUITER
-        // -------------------------------------------------
 
         if ("RECRUITER".equalsIgnoreCase(
                 user.getRole())) {
@@ -238,9 +216,7 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
         // NORMAL USER
-        // -------------------------------------------------
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
@@ -250,22 +226,20 @@ public class JobRestController {
     }
 
 
-    // =====================================================
     // UPDATE JOB
     //
     // ADMIN     -> ANY JOB
     // RECRUITER -> ONLY OWN JOB
     // USER      -> NO ACCESS
-    // =====================================================
 
     @PutMapping("/jobPost")
     public ResponseEntity<?> updateJob(
             @RequestBody JobPost jobPost,
             Authentication authentication) {
 
-        // -------------------------------------------------
+
         // Validate authentication
-        // -------------------------------------------------
+
 
         if (authentication == null ||
                 !authentication.isAuthenticated()) {
@@ -278,17 +252,15 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
+
         // Logged-in username
-        // -------------------------------------------------
+
 
         String username =
                 authentication.getName();
 
 
-        // -------------------------------------------------
         // Find logged-in user
-        // -------------------------------------------------
 
         User user =
                 userRepo.findByUsername(username);
@@ -303,9 +275,7 @@ public class JobRestController {
         }
 
 
-        // -------------------------------------------------
         // Find existing job
-        // -------------------------------------------------
 
         JobPost existingJob;
 
@@ -336,9 +306,7 @@ public class JobRestController {
         }
 
 
-        // =================================================
         // ADMIN
-        // =================================================
 
         if ("ADMIN".equalsIgnoreCase(
                 user.getRole())) {
@@ -363,9 +331,7 @@ public class JobRestController {
         }
 
 
-        // =================================================
         // RECRUITER
-        // =================================================
 
         if ("RECRUITER".equalsIgnoreCase(
                 user.getRole())) {
@@ -383,9 +349,7 @@ public class JobRestController {
             }
 
 
-            // -------------------------------------------------
             // Ownership check
-            // -------------------------------------------------
 
             String owner =
                     existingJob.getPostedBy();
@@ -416,9 +380,7 @@ public class JobRestController {
         }
 
 
-        // =================================================
         // NORMAL USER
-        // =================================================
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
@@ -428,13 +390,11 @@ public class JobRestController {
     }
 
 
-    // =====================================================
     // DELETE JOB
     //
     // ADMIN     -> ANY JOB
     // RECRUITER -> ONLY OWN JOB
     // USER      -> NO ACCESS
-    // =====================================================
 
     @DeleteMapping("/jobPost/{postId}")
     public ResponseEntity<?> deleteJob(
@@ -497,9 +457,8 @@ public class JobRestController {
         }
 
 
-        // =================================================
         // ADMIN
-        // =================================================
+
 
         if ("ADMIN".equalsIgnoreCase(
                 user.getRole())) {
@@ -512,9 +471,8 @@ public class JobRestController {
         }
 
 
-        // =================================================
+
         // RECRUITER
-        // =================================================
 
         if ("RECRUITER".equalsIgnoreCase(
                 user.getRole())) {
@@ -553,9 +511,8 @@ public class JobRestController {
         }
 
 
-        // =================================================
+
         // USER
-        // =================================================
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
@@ -565,9 +522,9 @@ public class JobRestController {
     }
 
 
-    // =====================================================
+
     // LOAD DATA
-    // =====================================================
+
 
     @GetMapping("/load")
     public String loadData() {

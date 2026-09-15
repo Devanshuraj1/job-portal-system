@@ -21,12 +21,28 @@ function OAuth2Success() {
       localStorage.setItem("username", decoded.sub || "");
       localStorage.setItem("role", decoded.role || "USER");
 
-      // Remove the JWT from browser history/address bar as soon as it is stored.
-      window.history.replaceState({}, document.title, "/oauth2/success");
+      window.history.replaceState(
+        {},
+        document.title,
+        "/oauth2/success"
+      );
 
-      navigate("/", { replace: true });
+      const role = decoded.role;
+
+      if (role === "RECRUITER") {
+        navigate("/recruiter-dashboard", { replace: true });
+      } else if (role === "ADMIN") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+
     } catch (error) {
       console.error("Google OAuth token error:", error);
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      localStorage.removeItem("role");
+
       navigate("/login", { replace: true });
     }
   }, [navigate]);

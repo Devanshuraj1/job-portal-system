@@ -11,9 +11,9 @@ const Navbar = () => {
   const username = localStorage.getItem("username");
 
 
-  // =========================
+  
   // LOGOUT
-  // =========================
+  
 
   const handleLogout = () => {
 
@@ -32,9 +32,9 @@ const Navbar = () => {
       <div className="navbar-container">
 
 
-        {/* =========================
-            LOGO
-        ========================= */}
+        
+            {/* LOGO */}
+       
 
         <Link
           to="/"
@@ -52,16 +52,16 @@ const Navbar = () => {
         </Link>
 
 
-        {/* =========================
+        {/* 
             NAVIGATION
-        ========================= */}
+         */}
 
         <div className="navbar-links">
 
 
-          {/* =========================
+          {/* 
               HOME
-          ========================= */}
+          */}
 
           <Link
             to="/"
@@ -71,17 +71,15 @@ const Navbar = () => {
           </Link>
 
 
-          {/* =========================
+          {/* 
               LOGGED IN OPTIONS
-          ========================= */}
+          */}
 
           {token && (
 
             <>
 
-              {/* =========================
-                  USER DASHBOARD
-              ========================= */}
+             
 
               {role === "USER" && (
 
@@ -95,9 +93,7 @@ const Navbar = () => {
               )}
 
 
-              {/* =========================
-                  RECRUITER DASHBOARD
-              ========================= */}
+              
 
               {role === "RECRUITER" && (
 
@@ -111,10 +107,10 @@ const Navbar = () => {
               )}
 
 
-              {/* =========================
+              {/* 
                   POST JOB
                   RECRUITER + ADMIN
-              ========================= */}
+               */}
 
               {(role === "RECRUITER" ||
                 role === "ADMIN") && (
@@ -129,10 +125,7 @@ const Navbar = () => {
               )}
 
 
-              {/* =========================
-                  ADMIN DASHBOARD
-              ========================= */}
-
+              {/* ADMIN DASHBOARD */}
               {role === "ADMIN" && (
 
                 <Link
@@ -149,9 +142,9 @@ const Navbar = () => {
           )}
 
 
-          {/* =========================
-              NOT LOGGED IN
-          ========================= */}
+          
+              {/* NOT LOGGED IN */}
+          
 
           {!token ? (
 
@@ -176,9 +169,7 @@ const Navbar = () => {
 
           ) : (
 
-            /* =========================
-               USER PROFILE + LOGOUT
-            ========================= */
+            
 
             <>
 
@@ -219,17 +210,12 @@ const Navbar = () => {
           )}
 
 
-          {/* =========================
-              CONTACT
-          ========================= */}
-
+          
           <a
-            href="https://telusko.com/"
-            target="_blank"
-            rel="noreferrer"
+            href="/contact"
             className="nav-link"
           >
-            Contact
+           💬 Feedback & Support
           </a>
 
 

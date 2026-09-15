@@ -1,0 +1,42 @@
+services:
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+
+    container_name: jobportal-backend
+
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/hibernatedb
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      FRONTEND_URL: http://localhost:3000
+
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_TO: ${MAIL_TO}
+
+    ports:
+      - "8084:8084"
+
+    volumes:
+      - ./Backend/uploads:/app/uploads
+
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+
+    container_name: jobportal-frontend
+
+    ports:
+      - "3000:80"
+
+    depends_on:
+      - backend
