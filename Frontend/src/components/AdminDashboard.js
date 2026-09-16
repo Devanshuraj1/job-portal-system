@@ -18,7 +18,7 @@ function AdminDashboard() {
     try {
 
       const response = await axios.get(
-        "http://localhost:8084/admin/recruiters/pending",
+        "/api/admin/recruiters/pending",
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -63,7 +63,7 @@ function AdminDashboard() {
     try {
 
       await axios.put(
-        `http://localhost:8084/admin/recruiters/${id}/approve`,
+        `/api/admin/recruiters/${id}/approve`,
         {},
         {
           headers: {
@@ -97,7 +97,7 @@ function AdminDashboard() {
     try {
 
       await axios.put(
-        `http://localhost:8084/admin/recruiters/${id}/reject`,
+        `/api/admin/recruiters/${id}/reject`,
         {},
         {
           headers: {

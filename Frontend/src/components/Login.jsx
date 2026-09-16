@@ -336,7 +336,7 @@ function Login() {
             className="google-login-button"
             onClick={() => {
               window.location.href =
-                "http://localhost:8084/oauth2/authorization/google";
+                "/oauth2/authorization/google";
             }}
           >
             <span className="google-icon">G</span>
