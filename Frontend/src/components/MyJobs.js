@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import "./MyJobs.css";
@@ -9,7 +9,7 @@ const MyJobs = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const loadJobs = async () => {
+    const loadJobs =useCallback( async () => {
         try {
             setLoading(true);
             setError("");
@@ -25,11 +25,11 @@ const MyJobs = () => {
         } finally {
             setLoading(false);
         }
-    };
+    },[navigate]);
 
     useEffect(() => {
         loadJobs();
-    }, []);
+    }, [loadJobs]);
 
     const handleDelete = async (postId) => {
         if (!window.confirm("Are you sure you want to delete this job?")) {

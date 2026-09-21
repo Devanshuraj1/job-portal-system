@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminDashboard.css";
 
@@ -13,7 +13,7 @@ function AdminDashboard() {
   // FETCH PENDING RECRUITERS
   // =========================
 
-  const fetchPendingRecruiters = async () => {
+  const fetchPendingRecruiters = useCallback( async () => {
 
     try {
 
@@ -40,7 +40,7 @@ function AdminDashboard() {
       setLoading(false);
 
     }
-  };
+  }, [token]);
 
 
   // =========================
@@ -48,10 +48,8 @@ function AdminDashboard() {
   // =========================
 
   useEffect(() => {
-
     fetchPendingRecruiters();
-
-  }, []);
+    }, [fetchPendingRecruiters]);
 
 
   // =========================

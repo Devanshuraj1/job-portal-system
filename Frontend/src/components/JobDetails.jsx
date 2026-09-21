@@ -12,9 +12,9 @@ function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // =========================
+ 
   // APPLY STATES
-  // =========================
+ 
 
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
@@ -24,9 +24,9 @@ function JobDetails() {
   const [matchPercentage, setMatchPercentage] = useState(null);
 
 
-  // =========================
+  
   // FETCH JOB
-  // =========================
+  
 
   useEffect(() => {
 
@@ -71,9 +71,9 @@ function JobDetails() {
   }, [id]);
 
 
-  // =========================
+ 
   // APPLY FOR JOB
-  // =========================
+ 
 
   const handleApply = async () => {
     if (!resumeFile) {
@@ -98,9 +98,9 @@ function JobDetails() {
   };
 
 
-  // =========================
+ 
   // FORMAT WORKPLACE
-  // =========================
+ 
 
   const formatWorkplace = (workplace) => {
 
@@ -125,9 +125,9 @@ function JobDetails() {
   };
 
 
-  // =========================
+  
   // FORMAT JOB TYPE
-  // =========================
+ 
 
   const formatJobType = (jobType) => {
 
@@ -148,9 +148,8 @@ function JobDetails() {
   };
 
 
-  // =========================
-  // LOADING
-  // =========================
+   // LOADING
+  
 
   if (loading) {
 
@@ -169,9 +168,9 @@ function JobDetails() {
   }
 
 
-  // =========================
+ 
   // ERROR
-  // =========================
+ 
 
   if (error || !job) {
 
@@ -212,9 +211,9 @@ function JobDetails() {
   }
 
 
-  // =========================
+ 
   // JOB DETAILS
-  // =========================
+ 
 
   return (
 
@@ -240,9 +239,7 @@ function JobDetails() {
         <div className="job-details-card">
 
 
-          {/* =========================
-              HEADER
-          ========================= */}
+          
 
           <div className="job-details-header">
 
@@ -282,9 +279,9 @@ function JobDetails() {
           </div>
 
 
-          {/* =========================
+          {/*
               JOB META
-          ========================= */}
+         */}
 
           <div className="job-meta">
 
@@ -511,13 +508,13 @@ function JobDetails() {
           </div>
 
 
-          {/* =========================
+          {/* 
               APPLY ACTION
-          ========================= */}
+          */}
 
           <div className="job-details-actions">
 
-            {!applied && (
+            {(!applied || showResumePicker) && (
               <input
                 type="file"
                 accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -543,9 +540,9 @@ function JobDetails() {
           </div>
 
 
-          {/* =========================
+          {/*
               APPLY MESSAGE
-          ========================= */}
+           */}
 
           {resumeFile && !applied && (
             <div className="resume-selected">Resume: {resumeFile.name}</div>
