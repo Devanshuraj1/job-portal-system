@@ -24,17 +24,17 @@ public class JobApplicationService {
     private ResumeMatchingService resumeMatchingService;
 
 
-    // =====================================================
+    
     // APPLY FOR JOB
-    // =====================================================
+    
 
     public JobApplication applyForJob(
             int jobId,
             String username, String resumeFile, String resumeText) {
 
-        // -------------------------------------------------
-        // 1. Check whether job exists
-        // -------------------------------------------------
+        
+        //  Check whether job exists
+        
 
         if (!jobRepo.existsById(jobId)) {
 
@@ -44,9 +44,9 @@ public class JobApplicationService {
         }
 
 
-        // -------------------------------------------------
-        // 2. Check duplicate application
-        // -------------------------------------------------
+        
+        //  Check duplicate application
+       
 
         boolean alreadyApplied =
                 applicationRepo
@@ -63,20 +63,20 @@ public class JobApplicationService {
         }
 
 
-        // -------------------------------------------------
-        // 3. Create application
-        // -------------------------------------------------
+        
+        //  Create application
+       
 
         JobPost job = jobRepo.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
         int matchPercentage = resumeMatchingService.calculate(job, resumeText);
 
         JobApplication application =
-                new JobApplication(jobId, username, resumeFile, matchPercentage);
+              new JobApplication(jobId, username, resumeFile, matchPercentage);
 
 
-        // -------------------------------------------------
-        // 4. Save application
-        // -------------------------------------------------
+       
+        //  Save application
+        
 
         return applicationRepo.save(
                 application
@@ -84,9 +84,9 @@ public class JobApplicationService {
     }
 
 
-    // =====================================================
+   
     // GET USER APPLICATIONS
-    // =====================================================
+    
 
     public List<JobApplication> getUserApplications(
             String username) {
@@ -97,9 +97,9 @@ public class JobApplicationService {
     }
 
 
-    // =====================================================
+   
     // GET JOB APPLICANTS
-    // =====================================================
+    
 
     public List<JobApplication> getJobApplicants(
             int jobId) {
@@ -110,10 +110,10 @@ public class JobApplicationService {
     }
 
 
-    // =====================================================
+    
     // GET ALL APPLICATIONS
     // ADMIN
-    // =====================================================
+   
 
     public List<JobApplication> getAllApplications() {
 
