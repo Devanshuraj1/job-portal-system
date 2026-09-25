@@ -16,8 +16,7 @@ Applicants can search and apply for jobs with resumes, Recruiters can manage job
 
 | Resource             | Link                                                                                |
 | -------------------- | ----------------------------------------------------------------------------------- |
-| 🌐 Live Application  | **[ADD LIVE FRONTEND URL]**                                                         |
-| ⚙️ Backend API       | **[ADD LIVE BACKEND URL]**                                                          |
+| 🌐 Live Application  | http://13.203.214.42                                                        |
 | 💻 GitHub Repository | [Devanshuraj1/job-portal-system](https://github.com/Devanshuraj1/job-portal-system) |
 | ☁️ Cloud             | AWS EC2                                                                             |
 | 🐳 Containerization  | Docker + Docker Compose                                                             |
