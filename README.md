@@ -1,19 +1,28 @@
 # 💼 Job Portal System
 
-A full-stack **Job Portal System** built with **React.js, Spring Boot, PostgreSQL, Spring Security, JWT, Google OAuth2, Docker, GitHub Actions, and AWS EC2**.
+A production-deployed **Full-Stack Job Portal System** built with **React.js, Spring Boot, PostgreSQL, Spring Security, JWT, Google OAuth2, Docker, Nginx, GitHub Actions, and AWS EC2**.
 
-The platform provides separate workflows for **Applicants, Recruiters, and Admins**, including job management, job approval, resume upload, applicant management, and skill-based resume matching.
+The platform supports three application roles:
+
+* **Applicant**
+* **Recruiter**
+* **Admin**
+
+Applicants can search and apply for jobs with resumes, Recruiters can manage jobs and applicants, and Admins can approve and manage jobs.
 
 ---
 
 ## 🔗 Live Project
 
-| Resource             | Link                                                                   |
-| -------------------- | ---------------------------------------------------------------------- |
-| 🌐 Live Application  | http://13.203.214.42                                                   | 
-| 💻 GitHub Repository | [Job Portal System](https://github.com/Devanshuraj1/job-portal-system) |
-
-
+| Resource             | Link                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| 🌐 Live Application  | **[ADD LIVE FRONTEND URL]**                                                         |
+| ⚙️ Backend API       | **[ADD LIVE BACKEND URL]**                                                          |
+| 💻 GitHub Repository | [Devanshuraj1/job-portal-system](https://github.com/Devanshuraj1/job-portal-system) |
+| ☁️ Cloud             | AWS EC2                                                                             |
+| 🐳 Containerization  | Docker + Docker Compose                                                             |
+| 🌐 Web Server        | Nginx                                                                               |
+| 🔄 CI/CD             | GitHub Actions                                                                      |
 
 ---
 
@@ -21,10 +30,10 @@ The platform provides separate workflows for **Applicants, Recruiters, and Admin
 
 ## 👤 Applicant
 
-* User registration and login
+* Registration and login
 * JWT authentication
 * Google OAuth2 login
-* Browse available jobs
+* Browse jobs
 * View job details
 * Apply for jobs
 * Upload PDF/DOCX resume
@@ -55,13 +64,13 @@ The platform provides separate workflows for **Applicants, Recruiters, and Admin
 
 ---
 
-# 🛠️ Technology Stack
+# 🛠️ Tech Stack
 
-| Category          | Technology                        |
+| Layer             | Technology                        |
 | ----------------- | --------------------------------- |
 | Frontend          | React.js, JavaScript              |
 | Routing           | React Router                      |
-| HTTP Client       | Axios                             |
+| API Client        | Axios                             |
 | Backend           | Java, Spring Boot                 |
 | Security          | Spring Security                   |
 | Authentication    | JWT + Google OAuth2               |
@@ -96,6 +105,7 @@ The platform provides separate workflows for **Applicants, Recruiters, and Admin
        ┌──────────────┐            ┌──────────────┐
        │   Frontend   │            │    Backend   │
        │ React + Nginx│            │ Spring Boot  │
+       │    :3000     │            │    :8084     │
        └──────┬───────┘            └──────┬───────┘
               │                           │
               │ REST API                  │
@@ -104,9 +114,8 @@ The platform provides separate workflows for **Applicants, Recruiters, and Admin
               │                    │  PostgreSQL  │
               │                    └──────────────┘
               │
-              └──────────────┐
-                             ▼
-                       Resume Storage
+              ▼
+        Resume Storage
 ```
 
 ---
@@ -162,28 +171,26 @@ job-portal-system/
 
 # 🔄 Application Flow
 
-The general request flow is:
-
 ```text
 React Frontend
-       │
-       │ HTTP / REST API
-       ▼
+      │
+      │ HTTP / REST API
+      ▼
 Spring Security
-       │
-       ▼
+      │
+      ▼
 Controller
-       │
-       ▼
+      │
+      ▼
 Service Layer
-       │
-       ▼
+      │
+      ▼
 Repository Layer
-       │
-       ▼
+      │
+      ▼
 Hibernate / JPA
-       │
-       ▼
+      │
+      ▼
 PostgreSQL
 ```
 
@@ -191,12 +198,13 @@ PostgreSQL
 
 # 🔐 Authentication & Authorization
 
-The application supports two authentication mechanisms:
+The application supports:
 
-* **JWT-based authentication**
-* **Google OAuth2 authentication**
+* JWT authentication
+* Google OAuth2 authentication
+* Role-based authorization
 
-The application has three roles:
+Application roles:
 
 ```text
 USER
@@ -204,7 +212,7 @@ RECRUITER
 ADMIN
 ```
 
-## JWT Authentication Flow
+## JWT Authentication
 
 ```text
 Login
@@ -230,78 +238,56 @@ Protected Resource
 
 # 🔑 Google OAuth2
 
-Google OAuth2 is available **only for normal USER accounts**.
+Google OAuth2 is available **only for USER accounts**.
 
-A user who signs in through Google is authenticated as:
-
-```text
-Google OAuth2
-      ↓
-    USER
-```
-
-Google OAuth2 does **not** automatically create or assign:
+Google login does not automatically create or assign Recruiter or Admin privileges.
 
 ```text
-RECRUITER
-ADMIN
-```
-
-### Google Login Flow
-
-```text
-User
- ↓
 Google Login
- ↓
+      ↓
 Google Authentication
- ↓
+      ↓
 OAuth2 Success Handler
- ↓
-Backend Verifies Google User
- ↓
-USER Role Assigned
- ↓
+      ↓
+Backend Verifies User
+      ↓
+USER Role
+      ↓
 JWT Generated
- ↓
-Frontend Receives Token
- ↓
+      ↓
 Authenticated USER
 ```
 
 Role separation:
 
 ```text
-Google Login       ───────► USER
+Google OAuth2      ─────► USER
 
-Recruiter Account  ───────► RECRUITER
+Recruiter Account  ─────► RECRUITER
 
-Admin Account      ───────► ADMIN
+Admin Account      ─────► ADMIN
 ```
 
-This ensures that Google authentication does not grant privileged recruiter or administrator permissions.
+This keeps OAuth2 authentication separate from privileged application roles.
 
 ---
 
 # 🛡️ Role-Based Authorization
 
-Authorization is handled on the backend using Spring Security.
+Authorization is enforced by the backend.
 
 ```text
-                    Authentication
-                          │
-                          ▼
-                        JWT
-                          │
-                          ▼
-                      JwtFilter
-                          │
-                          ▼
-                     User + Role
-                          │
-              ┌───────────┼───────────┐
-              ▼           ▼           ▼
-            USER      RECRUITER      ADMIN
+Authentication
+      ↓
+JWT
+      ↓
+JwtFilter
+      ↓
+User + Role
+      ↓
+Authorization
+      ↓
+Allowed / Denied
 ```
 
 ### USER
@@ -337,14 +323,12 @@ Authorization is handled on the backend using Spring Security.
 
 ---
 
-# 👥 Role-Based Application Flow
+# 👥 Role-Based Workflow
 
 ## Applicant
 
 ```text
 Register / Login
-       ↓
-Authentication
        ↓
 Browse Jobs
        ↓
@@ -364,38 +348,38 @@ Application Saved
 ## Recruiter
 
 ```text
-Recruiter Login
-       ↓
+Login
+  ↓
 Recruiter Dashboard
-       ↓
+  ↓
 Create Job
-       ↓
+  ↓
 Admin Approval
-       ↓
+  ↓
 Job Published
-       ↓
+  ↓
 Applicants Apply
-       ↓
+  ↓
 View Applicants
-       ↓
+  ↓
 Access Resume
-       ↓
+  ↓
 View Matching %
 ```
 
 ## Admin
 
 ```text
-Admin Login
-       ↓
+Login
+  ↓
 Admin Dashboard
-       ↓
+  ↓
 View Jobs / Users
-       ↓
+  ↓
 Review Jobs
-       ↓
+  ↓
 Approve / Reject
-       ↓
+  ↓
 Manage Platform
 ```
 
@@ -414,7 +398,7 @@ Maximum file size:
 5 MB
 ```
 
-### Processing Flow
+Processing flow:
 
 ```text
 Applicant
@@ -434,31 +418,31 @@ Matching Percentage
 Application Saved
 ```
 
-### PDF Processing
+### PDF
 
 ```text
 PDF
  ↓
 Apache PDFBox
  ↓
-Extract Resume Text
+Extract Text
 ```
 
-### DOCX Processing
+### DOCX
 
 ```text
 DOCX
  ↓
 Apache POI
  ↓
-Extract Resume Text
+Extract Text
 ```
 
 ---
 
 # 📊 Resume Matching
 
-The application calculates a skill-based matching percentage between the job requirements and the applicant's resume.
+The application calculates a skill-based matching percentage between job requirements and resume content.
 
 Example:
 
@@ -471,7 +455,7 @@ React
 PostgreSQL
 ```
 
-Resume contains:
+Resume:
 
 ```text
 Java
@@ -505,7 +489,7 @@ Calculate Percentage
 Matching %
 ```
 
-The matching logic is handled by:
+Implemented by:
 
 ```text
 ResumeMatchingService
@@ -513,9 +497,59 @@ ResumeMatchingService
 
 ---
 
-# 🐳 Docker Architecture
+# 🐳 Docker & Nginx
 
-The application is containerized using Docker and Docker Compose.
+The application uses Docker for containerization and **Nginx to serve the production React frontend**.
+
+## Frontend Production Flow
+
+```text
+React Source Code
+        ↓
+npm run build
+        ↓
+Production Build
+        ↓
+Nginx Docker Image
+        ↓
+Nginx
+        ↓
+Port 80
+        ↓
+Host Port 3000
+```
+
+The frontend Dockerfile uses a multi-stage build:
+
+```text
+Node.js
+   ↓
+React Build
+   ↓
+Static Production Files
+   ↓
+Nginx
+```
+
+Nginx serves the compiled React application instead of running the React development server in production.
+
+### React Routing
+
+The Nginx configuration supports React client-side routing by forwarding application routes to `index.html`.
+
+```text
+Browser
+   ↓
+Nginx
+   ↓
+React Production Build
+   ↓
+React Router
+```
+
+---
+
+# 🐳 Docker Architecture
 
 ```text
                   Docker Compose
@@ -526,50 +560,28 @@ The application is containerized using Docker and Docker Compose.
          Frontend            Backend
          Container           Container
               │                 │
-           Nginx            Spring Boot
+        React + Nginx      Spring Boot
               │                 │
-           Port 80           Port 8084
+           Port 80          Port 8084
               │                 │
-              └────────┬────────┘
+        Host Port 3000            │
+              │                   │
+              └────────┬──────────┘
                        │
                        ▼
                   PostgreSQL
 ```
 
-## Frontend
-
-```text
-React Source
-     ↓
-npm run build
-     ↓
-Production Build
-     ↓
-Nginx
-```
-
-## Backend
-
-```text
-Spring Boot
-     ↓
-Java 21 Runtime
-     ↓
-REST APIs
-```
-
-Docker provides a consistent environment for development and deployment.
-
 ---
 
 # ☁️ AWS EC2 Deployment
 
-The application is deployed on an **AWS EC2 instance**.
+The application is deployed on an **AWS EC2 instance** using Docker.
 
-Production flow:
+Production architecture:
 
 ```text
-                         Internet
+                         INTERNET
                             │
                             ▼
                      AWS EC2 Instance
@@ -579,21 +591,32 @@ Production flow:
                ┌────────────┴────────────┐
                │                         │
                ▼                         ▼
-          Frontend                    Backend
-          React/Nginx                Spring Boot
+        React + Nginx              Spring Boot
+          Frontend                   Backend
+           :3000                      :8084
                │                         │
                └────────────┬────────────┘
                             ▼
                        PostgreSQL
 ```
 
-The EC2 server runs the Dockerized application and provides the production environment for the project.
+### Production Components
+
+| Component      | Responsibility             |
+| -------------- | -------------------------- |
+| AWS EC2        | Cloud hosting              |
+| Docker         | Application containers     |
+| Docker Compose | Container orchestration    |
+| Nginx          | Production frontend server |
+| React          | Frontend                   |
+| Spring Boot    | Backend REST API           |
+| PostgreSQL     | Persistent data            |
 
 ---
 
 # 🔄 CI/CD Pipeline
 
-The project uses **GitHub Actions** for CI/CD automation.
+The project uses **GitHub Actions** for CI/CD.
 
 ```text
 Developer
@@ -608,21 +631,27 @@ GitHub Repository
 GitHub Actions
     │
     ├── Build
-    │
     ├── Test
-    │
     ├── Docker Build
-    │
     └── Deploy
-          │
-          ▼
-       AWS EC2
-          │
-          ▼
-    Docker Compose
-          │
-          ▼
- Updated Application
+            │
+            ▼
+         AWS EC2
+            │
+            ▼
+      Docker Compose
+            │
+      ┌─────┴─────┐
+      ▼           ▼
+   Frontend     Backend
+   + Nginx    Spring Boot
+      │           │
+      └─────┬─────┘
+            ▼
+        PostgreSQL
+            │
+            ▼
+      Live Application
 ```
 
 ## CI/CD Flow
@@ -644,7 +673,7 @@ GitHub Actions
           ↓
 8. AWS EC2
           ↓
-9. Docker containers updated
+9. Containers updated
           ↓
 10. Application becomes live
 ```
@@ -653,23 +682,19 @@ GitHub Actions
 
 # 🧪 Testing
 
-The project includes automated testing at two levels.
+The project includes:
 
-## Unit Testing
+### Unit Testing
 
-Unit tests validate individual business logic components.
+Tests individual business logic such as:
 
-Examples:
+* Service logic
+* Resume matching
+* Validation
 
-```text
-Service Logic
-Resume Matching
-Validation
-```
+### Integration Testing
 
-## Integration Testing
-
-Integration tests verify communication between multiple application layers.
+Tests interaction between application layers:
 
 ```text
 Controller
@@ -681,7 +706,7 @@ Repository
 Database
 ```
 
-Testing is also integrated into the CI/CD workflow before deployment.
+Testing is included in the CI/CD workflow before deployment.
 
 ---
 
@@ -689,7 +714,7 @@ Testing is also integrated into the CI/CD workflow before deployment.
 
 The application uses **PostgreSQL** for persistent data.
 
-Main application entities include:
+Main entities:
 
 ```text
 User
@@ -697,13 +722,13 @@ JobPost
 JobApplication
 ```
 
-The database stores application data and resume references, while uploaded resume files are stored separately.
+Application metadata and resume references are stored in PostgreSQL, while actual resume files are stored separately.
 
 ---
 
 # 🌐 Frontend
 
-The frontend is built with React.js.
+The frontend is built using React.js.
 
 Important components include:
 
@@ -722,11 +747,11 @@ MyJobs
 AdminDashboard
 ```
 
-React Router is used for client-side routing and Axios is used for backend API communication.
+React Router handles client-side routing and Axios handles communication with the Spring Boot REST API.
 
 ---
 
-# 🔌 Frontend ↔ Backend Communication
+# 🔌 Frontend ↔ Backend
 
 ```text
 React Frontend
@@ -745,13 +770,11 @@ Service Layer
 PostgreSQL
 ```
 
-Protected requests include the JWT authentication token.
+Protected requests include JWT authentication.
 
 ---
 
 # 📁 Resume Storage
-
-Uploaded resumes are stored separately from the database.
 
 ```text
 Backend/
@@ -762,13 +785,13 @@ Backend/
         └── ...
 ```
 
-PostgreSQL stores the application metadata and resume reference, while the actual resume file is stored in the configured file storage directory.
+The database stores application metadata and resume references, while the actual files are stored in the configured upload directory.
 
 ---
 
 # 🔒 Security
 
-Security features implemented in the application include:
+Security features include:
 
 * Spring Security
 * JWT authentication
@@ -784,16 +807,7 @@ Security features implemented in the application include:
 * Recruiter-specific resume access
 * Backend-side authorization
 
-Sensitive credentials such as:
-
-```text
-Database Password
-JWT Secret
-Google Client ID
-Google Client Secret
-```
-
-are configured through environment variables/secrets and should not be committed to GitHub.
+Sensitive credentials such as database passwords, JWT secrets, and Google OAuth credentials should be provided through environment variables/secrets and never committed to GitHub.
 
 ---
 
@@ -809,7 +823,7 @@ are configured through environment variables/secrets and should not be committed
 * Docker Compose
 * Git
 
-## Clone Repository
+## Clone
 
 ```bash
 git clone https://github.com/Devanshuraj1/job-portal-system.git
@@ -817,7 +831,7 @@ git clone https://github.com/Devanshuraj1/job-portal-system.git
 cd job-portal-system
 ```
 
-## Run Backend
+## Backend
 
 ```bash
 cd Backend
@@ -831,7 +845,7 @@ Backend:
 http://localhost:8084
 ```
 
-## Run Frontend
+## Frontend
 
 ```bash
 cd Frontend
@@ -846,7 +860,7 @@ Frontend:
 http://localhost:3000
 ```
 
-## Run with Docker
+## Docker
 
 From the project root:
 
@@ -860,13 +874,13 @@ Check containers:
 docker compose ps
 ```
 
-Stop containers:
+Stop:
 
 ```bash
 docker compose down
 ```
 
-View logs:
+Logs:
 
 ```bash
 docker compose logs backend
@@ -875,33 +889,79 @@ docker compose logs frontend
 
 ---
 
-# 📌 Project Highlights
+# 📌 End-to-End Deployment Flow
 
 ```text
-React.js
-     +
-Spring Boot
-     +
-PostgreSQL
-     +
-Spring Security
-     +
-JWT
-     +
-Google OAuth2
-     +
-Resume Processing
-     +
-Skill Matching
-     +
-Docker
-     +
+Developer
+    │
+    ▼
+GitHub
+    │
+    ▼
 GitHub Actions
-     +
-AWS EC2
+    │
+    ├── Build
+    ├── Test
+    └── Docker
+          │
+          ▼
+       AWS EC2
+          │
+     Docker Compose
+          │
+     ┌────┴────┐
+     ▼         ▼
+Frontend     Backend
+React        Spring Boot
+   │
+ Nginx
+   │
+   └──────────┐
+              ▼
+         PostgreSQL
+              │
+              ▼
+       Live Application
 ```
 
-The project demonstrates an end-to-end software development and deployment workflow:
+---
+
+# 📈 Project Highlights
+
+* Full-stack React + Spring Boot application
+* REST API architecture
+* JWT authentication
+* Google OAuth2 for USER accounts
+* Role-based Applicant / Recruiter / Admin workflows
+* Resume upload and processing
+* PDF/DOCX text extraction
+* Skill-based resume matching
+* PostgreSQL persistence
+* Docker containerization
+* **Nginx production frontend**
+* GitHub Actions CI/CD
+* AWS EC2 deployment
+* Unit and integration testing
+
+---
+
+# 👨‍💻 Author
+
+**Devanshu Raj**
+
+Full-Stack Developer
+
+**Technologies:** Java | Spring Boot | React.js | PostgreSQL | Docker | Nginx | AWS
+
+### GitHub
+
+https://github.com/Devanshuraj1/job-portal-system
+
+---
+
+# ⭐ Project Summary
+
+**Job Portal System** demonstrates a complete software development and deployment lifecycle:
 
 ```text
 Development
@@ -912,59 +972,13 @@ Testing
      ↓
 Dockerization
      ↓
-GitHub Actions
+Nginx Production Frontend
      ↓
-CI/CD
+GitHub Actions CI/CD
      ↓
 AWS EC2
      ↓
-Production Deployment
+Live Application
 ```
 
----
-
-# 👨‍💻 Author
-
-**Devanshu Raj**
-
-Full-Stack Developer
-
-**Technologies:** Java | Spring Boot | React.js | PostgreSQL | Docker | AWS
-
-### GitHub
-
-https://github.com/Devanshuraj1/job-portal-system
-
----
-
-# ⭐ Project Summary
-
-**Job Portal System** is a full-stack production-deployed application that demonstrates:
-
-* Secure authentication and authorization
-* Role-based Applicant, Recruiter, and Admin workflows
-* Google OAuth2 for USER accounts
-* Resume upload and processing
-* Skill-based resume matching
-* REST API architecture
-* PostgreSQL persistence
-* Unit and integration testing
-* Docker containerization
-* GitHub Actions CI/CD
-* AWS EC2 deployment
-
-The project follows a complete development-to-production workflow:
-
-```text
-Code
- ↓
-GitHub
- ↓
-CI/CD
- ↓
-Docker
- ↓
-AWS EC2
- ↓
-Live Application
-
+The project combines secure authentication, role-based authorization, resume processing, skill matching, containerization, CI/CD, and cloud deployment into a single production-oriented full-stack application.
